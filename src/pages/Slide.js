@@ -23,15 +23,15 @@ const Slide = () => {
        <Slider {...settings}>
 
             <div>
-              <img src= {image1} className="slide-img" />
+              <img src= {image1} alt="Sen École Virtuelle" className="slide-img" />
             </div>
 
             <div>
-              <img src= {pwf} className="slide-img" />
+              <img src= {pwf} alt="Sen École Virtuelle" className="slide-img" />
             </div>
 
             <div>
-              <img src= {photo1} className="slide-img" />
+              <img src= {photo1} alt="Sen École Virtuelle" className="slide-img" />
             </div>
 
   </Slider>

@@ -48,6 +48,8 @@ const PosterCours = ({ onClose, selectedClasseId, onCoursAjoute }) => {
         },
       });
 
+      console.log("Réponse backend :", res.data);
+
       const nouveauCours = res.data;
       
       // 🔹 Mise à jour immédiate dans la liste des cours

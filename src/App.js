@@ -15,6 +15,8 @@ import "./App.css";
 import ClasseDetail from "./pages/ClasseDetail"; // ⚡ à créer
 import EleveDashboard from "./components/EleveDashboard";
 import Fouteur from "./components/Fouteur";
+import LiveProf from "./components/LiveProf";
+import LiveEleve from "./components/LiveEleve";
 
 
 // Layout public (avec Entete + Navbar)
@@ -61,10 +63,16 @@ function App() {
          path="/espace-prof" 
          element={<PublicLayout><Espaceprofs /></PublicLayout>} />
 
-        <Route 
-        path="/classe/:id" 
-        element={<ClasseDetail />} /> {/* nouvelle route */}
+        <Route path="/classe/:id" element={<ClasseDetail />} /> 
+
+      <Route    path="/live-prof/:classeId"  element={<LiveProf/>}/>
+      <Route   path="/live-eleve/:classeId"  element={<LiveEleve/>}/>
+
+      {/*<Route    path="/live-prof"  element={<LiveProf/>}/>
+      <Route   path="/live-eleve"  element={<LiveEleve/>}/>*/}
       </Routes>
+
+     
     </BrowserRouter>
   );
 }

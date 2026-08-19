@@ -57,9 +57,8 @@ const FormulaireClasse=({ onClassCreated })=>{
         placeholder="Série"
         value={serie}
         onChange={(e) => setSerie(e.target.value)}
-        required
+        //required
       />
-
       <textarea
           placeholder="Description"
           value={description}
@@ -74,75 +73,7 @@ const FormulaireClasse=({ onClassCreated })=>{
 
     {message && <p className="formulaire-message">{message}</p>}
   </div>
-    /*<div className="form-wrapper">
-      <form className="formulaire" onSubmit={handleSubmit}>
-        <h1>Classe</h1>
-  
-        <input
-          type="text"
-          placeholder="Série"
-          value={serie}
-          onChange={(e) => setSerie(e.target.value)}
-          required
-        />
-  
-        <input
-          type="text"
-          placeholder="Niveau"
-          value={niveau}
-          onChange={(e) => setNiveau(e.target.value)}
-          required
-        />
-  
-        <textarea
-          placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-        />
-  
-        <button className="btn" type="submit">
-          Créer la classe
-        </button>
-      </form>
-  
-      {message && <p className="error">{message}</p>}
-    </div>*/
   );
-  
-
-    /*return(
-    
-        <div >
-      <form className="formulaire" onSubmit={handleSubmit}>
-        <h1>Classe</h1>
-        <input
-          type="text"
-          placeholder="Série"
-          value={serie}
-          onChange={(e) => setSerie(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Niveau"
-          value={niveau}
-          onChange={(e) => setNiveau(e.target.value)}
-          required
-        />
-        <input
-          className="text"
-          placeholder="Descriptipn"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-        />
-
-        <button className="button" type="submit"><strong>Create your class</strong></button>
-        <br/>
-      </form>
-      {message && <p>{message}</p>}
-    </div> 
-    );*/
 }
 
 export default FormulaireClasse;

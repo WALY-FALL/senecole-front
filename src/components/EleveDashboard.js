@@ -3,7 +3,12 @@ import axios from "axios";
 import ListeProfs from "./ListeProfs";
 import ListeClasses from "./ListeClasses";
 import ListeCoursEleve from "./ListeCoursEleve";
-//import ListeEleves from "./ListeEleves";
+import ListeExercicesEleve from "./ListeExercicesEleve";
+import ListeDevoirsEleve from "./ListeDevoirsEleve";
+import {useNavigate} from "react-router-dom";
+import socket from "../socket";
+
+
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -12,10 +17,13 @@ const EleveDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [profSelectionne, setProfSelectionne] = useState(null);
-  const [eleveId, setEleveId] = useState(null);
-  const [profId, setProfId] = useState(null);
+  //const [eleveId, setEleveId] = useState(null);
+  //const [profId, setProfId] = useState(null);
   const [classeId, setClasseId] = useState(null); // ✅ manquant
   const [hasChosen, setHasChosen] = useState(false); // ✅ manquant
+  const [liveActif,setLiveActif] = useState(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfs = async () => {
@@ -23,8 +31,15 @@ const EleveDashboard = () => {
       try {
         const response = await axios.get(`${API_URL}/profs`);
         setProfs(response.data);
+        console.log("📥 Réponse live :", response.data);
       } catch (err) {
-        console.error("Erreur lors du chargement des profs :", err);
+       // console.error("Erreur lors du chargement des profs :", err);
+       console.error(
+        "❌ Erreur recherche live :",
+        err.response?.status,
+        err.response?.data
+      );
+      setLiveActif(null);
         setError("Impossible de charger les profs");
       } finally {
         setLoading(false);
@@ -42,7 +57,7 @@ useEffect(() => {
     console.warn("⚠️ eleveId introuvable dans le localStorage");
     // tu peux rediriger vers le login ici si tu veux
   } else {
-    setEleveId(id);
+    //setEleveId(id);
     console.log("🔍 eleveId récupéré :", id);
   }
 }, []);
@@ -55,8 +70,8 @@ useEffect(() => {
   const storedClasseId = localStorage.getItem("classeId");
 
   if (storedEleveId) {
-    setEleveId(storedEleveId);
-    setProfId(storedProfId);
+    //setEleveId(storedEleveId);
+    //setProfId(storedProfId);
     setClasseId(storedClasseId);
     if (storedProfId && storedClasseId) {
       setHasChosen(true);
@@ -65,6 +80,212 @@ useEffect(() => {
     console.warn("⚠️ Aucun eleveId trouvé dans le localStorage");
   }
 }, []);
+
+useEffect(() => {
+  console.log("🚨 USEEFFECT LIVE EXÉCUTÉ");
+  console.log("🚨 classeId =", classeId);
+
+  const verifierLive = async () => {
+
+    if (!classeId) {
+      console.log("Pas de classe sélectionnée");
+      setLiveActif(null);
+      return;
+    }
+
+    try {
+
+      const token = localStorage.getItem("token");
+
+      console.log(
+        "🔎 Recherche live pour classe :",
+        classeId
+      );
+
+      console.log(
+        "🔑 TOKEN :",
+        token
+      );
+
+      const res = await axios.get(
+        `${API_URL}/live-cours/classe/${classeId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      console.log(
+        "📥 Réponse serveur live :",
+        res.data
+      );
+
+      if (
+        res.data &&
+        res.data.statut === "en_cours"
+      ) {
+
+        console.log(
+          "✅ LIVE ACTIF TROUVÉ :",
+          res.data
+        );
+
+        setLiveActif(res.data);
+
+      } else {
+
+        console.log(
+          "⚠️ Réponse reçue mais aucun live en cours"
+        );
+
+        setLiveActif(null);
+      }
+
+    } catch (err) {
+
+      console.error(
+        "❌ ERREUR RECHERCHE LIVE :",
+        err.response?.status,
+        err.response?.data || err.message
+      );
+
+      setLiveActif(null);
+    }
+
+  };
+
+  verifierLive();
+
+}, [classeId]);
+/*useEffect(()=>{
+
+  const verifierLive = async()=>{
+
+    if(!classeId){
+      console.log("Pas de classe sélectionnée");
+      return;
+     }
+  
+  try{
+  
+  const token = localStorage.getItem("token");
+  
+  console.log(
+    "🔎 Recherche live pour classe :",
+    classeId
+    );
+  const res = await axios.get(
+  `${API_URL}/live-cours/classe/${classeId}`,
+  {
+  headers:{
+  Authorization:`Bearer ${token}`
+  }
+  }
+  );
+  console.log("🔑 TOKEN :", token);
+  
+  console.log(
+  "🎥 Live trouvé :",
+  res.data
+  );
+  
+  
+  if(res.data && res.data.statut==="en_cours"){
+  
+  setLiveActif(res.data);
+  
+  }
+
+ 
+  
+  
+  }catch(err){
+  
+  console.log(
+  "Pas de live actif"
+  );
+  
+  }
+  
+  
+  };
+  
+  
+  verifierLive();
+  
+  
+  },[classeId]);*/
+
+  useEffect(()=>{
+
+    socket.on("live-started",
+    (data)=>{
+    console.log("🔥 Nouveau live reçu", data);
+    if(data.classeId===classeId){
+     //setLiveActif(live);
+
+    setLiveActif({
+      _id: data.liveId,
+      classeId: data.classeId,
+      titre: data.titre,
+      statut: "en_cours"
+    });
+    }
+    
+    });
+    
+    
+    return()=>{
+    
+    socket.off("live-started");
+    
+    };
+    
+    
+    },[classeId]);
+
+    useEffect(() => {
+
+      if(!classeId) return;
+    
+    
+      socket.emit("join-room", classeId);
+    
+    
+      socket.on("live-started", (data)=>{
+    
+        console.log("🔥 Nouveau live reçu :", data);
+    
+    
+        setLiveActif({
+          _id:data.liveId,
+          classeId:data.classeId,
+          titre:data.titre,
+          statut:"en_cours"
+        });
+    
+    
+      });
+    
+    
+      return ()=>{
+    
+        socket.off("live-started");
+    
+      };
+    
+    
+    },[classeId]);
+
+    useEffect(()=>{
+
+      console.log(
+        "LIVE ACTUEL :",
+        liveActif
+      );
+     
+     },[liveActif]);
 
 
 
@@ -131,9 +352,12 @@ useEffect(() => {
 
 
   
-
+console.log("LIVE ACTIF :", liveActif);
+console.log("Statut :", liveActif?.statut);
+console.log("Classe :", classeId);
   return (
     <div style={{ padding: "20px", maxWidth: "800px", margin: "auto" }}>
+
       <h1>Tableau de bord de l'élève:</h1>
 
       {loading && <p>Chargement des profs...</p>}
@@ -160,6 +384,16 @@ useEffect(() => {
           >
             ← Retour à la liste des profs
           </button>
+         {/* {
+            liveActif?.statut==="en_cours" && (
+
+            <button
+              onClick={()=>navigate(`/live-eleve/${classeId}`)}
+            >
+              🎥 Rejoindre le cours en direct
+            </button>
+            )
+            } */}
 
           <h2>
             Classes de {profSelectionne.prenom}  {profSelectionne.nom}
@@ -176,6 +410,26 @@ useEffect(() => {
     <ListeEleves profId={profSelectionne._id} /> */}{/* 👈 ICI on envoie le profId */}
  {/*</div>
 )} */} 
+
+{hasChosen && classeId && (
+
+<div>
+
+  {liveActif?.statut === "en_cours" && (
+
+    <button
+      onClick={() =>
+        navigate(`/live-eleve/${classeId}`)
+      }
+    >
+      🎥 Rejoindre le cours en direct
+    </button>
+
+  )}
+
+</div>
+
+)}
           {/* ✅ Affichage des cours uniquement si une classe est choisie */}
     {hasChosen && classeId && (
       <div style={{ marginTop: "20px" }}>
@@ -183,6 +437,26 @@ useEffect(() => {
         <ListeCoursEleve classeId={classeId} />
       </div>
     )}
+
+         {/* ✅ Affichage des exercices uniquement si une classe est choisie */}
+         {hasChosen && classeId && (
+      <div style={{ marginTop: "20px" }}>
+        {/*<h3>📚 Cours de la classe sélectionnée</h3>*/}
+        <ListeExercicesEleve classeId={classeId} />
+      </div>
+    )}
+
+
+
+         {/* ✅ Affichage des devoirs uniquement si une classe est choisie */}
+         {hasChosen && classeId && (
+      <div style={{ marginTop: "20px" }}>
+        {/*<h3>📚 Cours de la classe sélectionnée</h3>*/}
+        <ListeDevoirsEleve classeId={classeId} />
+      </div>
+    )}
+
+
 
         </div>
       )}

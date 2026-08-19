@@ -130,6 +130,8 @@ const SignupProf = () => {
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("profId", res.data.prof.id);
         localStorage.setItem("email", res.data.prof.email);
+        localStorage.setItem("prenom", res.data.prof.prenom);
+        localStorage.setItem("nom", res.data.prof.nom);
         setMessage("Compte créé avec succès !");
         navigate("/login-prof");
       } else {

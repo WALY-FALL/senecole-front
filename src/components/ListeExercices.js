@@ -1,12 +1,14 @@
 import React from "react";
 
-const ListeCours = ({ coursClasse, handleDeleteCours, API_URL }) => {
+const ListeExercices = ({ exercicesClasse, handleDeleteExercices, API_URL }) => {
+
+    console.log("exercicesClasse:", exercicesClasse);
   return (
     <div>
-      <h3>📚 Cours de la classe</h3>
+      <h3>📚 Exercices de la classe</h3>
 
-      {coursClasse.length === 0 ? (
-        <p>Aucun cours pour le moment.</p>
+      {exercicesClasse.length === 0 ? (
+        <p>Aucun exercice pour le moment.</p>
       ) : (
         <ul
           style={{
@@ -17,7 +19,7 @@ const ListeCours = ({ coursClasse, handleDeleteCours, API_URL }) => {
             gap: "15px",
           }}
         >
-          {coursClasse.map((c) => (
+          {exercicesClasse.map((c) => (
             <li
               key={c._id}
               style={{
@@ -75,10 +77,9 @@ const ListeCours = ({ coursClasse, handleDeleteCours, API_URL }) => {
                 </div>
               )}
 
-
-{handleDeleteCours && (
+{handleDeleteExercices && (
   <button
-    onClick={() => handleDeleteCours(c._id)}
+    onClick={() => handleDeleteExercices(c._id)}
     style={{
       marginTop: "8px",
       border: "none",
@@ -91,6 +92,20 @@ const ListeCours = ({ coursClasse, handleDeleteCours, API_URL }) => {
     🗑 Supprimer
   </button>
 )}
+
+          {/*<button
+                onClick={() => handleDeleteExercices(c._id)}
+                style={{
+                  marginTop: "8px",
+                  border: "none",
+                  padding: "5px 8px",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                }}
+              >
+                🗑 Supprimer
+              </button>*/}
             </li>
           ))}
         </ul>
@@ -99,4 +114,4 @@ const ListeCours = ({ coursClasse, handleDeleteCours, API_URL }) => {
   );
 };
 
-export default ListeCours;
+export default ListeExercices;

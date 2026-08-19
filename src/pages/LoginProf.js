@@ -86,17 +86,38 @@ const LoginProf = () => {
     try {
       //const res = await axios.post("http://localhost:8989/api/profs/login", formData);
       const res = await axios.post(`${API_URL}/profs/login`, formData);
+    
 
-      if (res.data.success) {
+      if (res.data.token) {
+
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("profId", res.data.prof._id ||res.data.prof.id ); // ⚠️ _id et pas id
+        localStorage.setItem("email", res.data.prof.email);
+        localStorage.setItem("prenom", res.data.prof.prenom);
+        localStorage.setItem("nom", res.data.prof.nom);
+      
+        console.log("✅ TOKEN STOCKÉ :", res.data.token);
+        console.log("🌐 API utilisée :", API_URL);
+      
+        setMessage("Connexion réussie !");
+        navigate("/espace-prof");
+      
+      } else {
+        setMessage(res.data.message || "Erreur login");
+      }
+
+     /* if (res.data.success) {
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("profId", res.data.prof.id);
         localStorage.setItem("email", res.data.prof.email);
+        localStorage.setItem("prenom", res.data.prof.prenom);
 
         setMessage("Connexion réussie !");
         navigate("/espace-prof");
+        console.log("Réponse login :", res.data);
       } else {
         setMessage(res.data.message);
-      }
+      }*/
     } catch (err) {
       console.error("Erreur loginProf:", err.response ? err.response.data : err.message);
       setMessage("Erreur lors de la connexion");

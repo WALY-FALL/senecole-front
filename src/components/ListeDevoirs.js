@@ -1,12 +1,12 @@
 import React from "react";
 
-const ListeCours = ({ coursClasse, handleDeleteCours, API_URL }) => {
+const ListeDevoirs = ({devoirsClasse, handleDeleteDevoirs, API_URL }) => {
   return (
     <div>
-      <h3>📚 Cours de la classe</h3>
+      <h3>📚 Devoirs de la classe</h3>
 
-      {coursClasse.length === 0 ? (
-        <p>Aucun cours pour le moment.</p>
+      {devoirsClasse.length === 0 ? (
+        <p>Aucun devoir pour le moment.</p>
       ) : (
         <ul
           style={{
@@ -17,7 +17,7 @@ const ListeCours = ({ coursClasse, handleDeleteCours, API_URL }) => {
             gap: "15px",
           }}
         >
-          {coursClasse.map((c) => (
+          {devoirsClasse.map((c) => (
             <li
               key={c._id}
               style={{
@@ -75,10 +75,9 @@ const ListeCours = ({ coursClasse, handleDeleteCours, API_URL }) => {
                 </div>
               )}
 
-
-{handleDeleteCours && (
+{handleDeleteDevoirs && (
   <button
-    onClick={() => handleDeleteCours(c._id)}
+    onClick={() => handleDeleteDevoirs(c._id)}
     style={{
       marginTop: "8px",
       border: "none",
@@ -91,6 +90,20 @@ const ListeCours = ({ coursClasse, handleDeleteCours, API_URL }) => {
     🗑 Supprimer
   </button>
 )}
+
+              {/*<button
+                onClick={() => handleDeleteDevoirs(c._id)}
+                style={{
+                  marginTop: "8px",
+                  border: "none",
+                  padding: "5px 8px",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                }}
+              >
+                🗑 Supprimer
+              </button>*/}
             </li>
           ))}
         </ul>
@@ -99,4 +112,4 @@ const ListeCours = ({ coursClasse, handleDeleteCours, API_URL }) => {
   );
 };
 
-export default ListeCours;
+export default ListeDevoirs;

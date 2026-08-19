@@ -1,0 +1,122 @@
+.conteneur-classe-cours {
+    width: 100%;
+    /*padding: 15px;*/
+    box-sizing: border-box;
+}
+
+.titre-classe {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0px;
+    flex-wrap: wrap;
+    background: #f5f5f5;
+    padding: 15px;
+    
+    border-radius: 10px;
+}
+
+.titre-classe h2{
+        margin: 0px;
+        padding: 0px;
+    }
+
+.titre-section {
+    margin: 0px;
+    font-size: 1.5rem;
+}
+
+.titre {
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 15px;
+    flex-wrap: wrap;
+flex: 1;
+}
+
+.titre h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    white-space: normal;
+}
+
+
+/* Tablette */
+@media (max-width: 768px) {
+
+    .titre-classe {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .titre {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+}
+
+
+/* Téléphone */
+@media (max-width: 480px) {
+
+    .conteneur-classe-cours {
+        padding: 10px;
+    }
+
+    .titre-classe {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .titre-section {
+        font-size: 1.2rem;
+    }
+
+    .titre {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .titre h2 {
+        font-size: 0.95rem;
+        width: 100%;
+        overflow-wrap: break-word;
+    }
+}
+
+
+/*Nav css*/
+
+.nav-boutons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+/* Tous les boutons */
+.nav-boutons button {
+    flex: 1 1 150px; /* même largeur + responsive */
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+   /* background: #007bff;
+    color: white;*/
+    cursor: pointer;
+
+    /* IMPORTANT pour éviter le débordement */
+    white-space: normal;
+    word-break: break-word;
+    text-align: center;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .nav-boutons button {
+        flex: 1 1 100%; /* un bouton par ligne */
+    }
+}

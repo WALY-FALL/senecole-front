@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import "../style/espaceprofs.css";
 import FormulaireClasse from "./FormulaireClasse";
 import PosterCours from "../components/PosterCours";
+import PosterExercices from "../components/PosterExercices";
+import PosterDevoirs from "../components/PosterDevoirs";
 import DemandesAccesProf from "../components/DemandesAccesProf";
+import ListeExercices from "../components/ListeExercices";
+import ListeDevoirs from "../components/ListeDevoirs";
+import socket from "../socket";
+
+
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
@@ -10,17 +19,25 @@ const Espaceprofs = () => {
   const [showForm, setShowForm] = useState(false);
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState("");
-  const [profId, setProfId] = useState(null);
+  //const [email, setEmail] = useState("");
+  const [prenom, setPrenom] = useState("");
+  const [nom, setNom] = useState("");
+  //const [profId, setProfId] = useState(null);
   const [selectedClasse, setSelectedClasse] = useState(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
+  const [showUploadFormExercices, setShowUploadFormExercices] = useState(false);
+  const [showUploadFormDevoirs, setShowUploadFormDevoirs] = useState(false);
   const [coursClasse, setCoursClasse] = useState([]);
+  const [exercicesClasse, setExercicesClasse] = useState([]);
+  const [devoirsClasse, setDevoirsClasse] = useState([]);
+  const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
 
   // 🔹 Charger les classes du prof
   const fetchClasses = async () => {
     try {
+   
       const res = await axios.get(`${API_URL}/classes/my-classes`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -48,6 +65,8 @@ const Espaceprofs = () => {
   const handleSelectClasse = async (classe) => {
     setSelectedClasse(classe);
     fetchCoursClasse(classe._id);
+    fetchExercicesClasse(classe._id);
+    fetchDevoirsClasse(classe._id);
   };
 
   // 🔹 Supprimer une classe
@@ -67,9 +86,11 @@ const Espaceprofs = () => {
   const handleBackToList = () => {
     setSelectedClasse(null);
     setCoursClasse([]);
+    setExercicesClasse([]);
+    setDevoirsClasse([]);
   };
 
-
+//Supprimer un cours
   const handleDeleteCours = async (coursId) => {
     const confirmSuppression = window.confirm(
       "Voulez-vous vraiment supprimer ce cours ?"
@@ -80,7 +101,9 @@ const Espaceprofs = () => {
       await axios.delete(`${API_URL}/cours/${coursId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
+    
+
+
       // ✅ Mise à jour correcte du state
       setCoursClasse((prev) => prev.filter((c) => c._id !== coursId));
   
@@ -96,15 +119,212 @@ const Espaceprofs = () => {
     }
   };
   
+//Partie exercices
+
+// 🔹 Charger les exercices d'une classe
+const fetchExercicesClasse = async (classeId) => {
+  try {
+    const res = await axios.get(`${API_URL}/exercices/classe/${classeId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setExercicesClasse(res.data || []);
+  } catch (err) {
+    console.error("Erreur chargement cours:", err);
+  }
+};
+
+//Supprimer un exercice
+const handleDeleteExercices = async (exercicesId) => {
+  const confirmSuppression = window.confirm(
+    "Voulez-vous vraiment supprimer ces exercices ?"
+  );
+  if (!confirmSuppression) return;
+
+  try {
+    await axios.delete(`${API_URL}/exercices/${exercicesId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  
+
+
+    // ✅ Mise à jour correcte du state
+    setExercicesClasse((prev) => prev.filter((c) => c._id !== exercicesId));
+
+    alert("✅ Exercice supprimé avec succès !");
+  } catch (err) {
+    console.error("Erreur lors de la suppression de l'exercices :", err);
+
+    if (err.response?.status === 404) {
+      alert("❌ Exercice introuvable.");
+    } else {
+      alert("❌ Erreur serveur lors de la suppression de l'exercice.");
+    }
+  }
+};
+
+
+//Partie devoirs
+
+//Charger les devoirs d'une classe
+const fetchDevoirsClasse = async (classeId) => {
+  try {
+    const res = await axios.get(`${API_URL}/devoirs/classe/${classeId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setDevoirsClasse(res.data || []);
+  } catch (err) {
+    console.error("Erreur chargement devoirs:", err);
+  }
+};
+
+//Supprimer un devoir
+const handleDeleteDevoirs = async (devoirsId) => {
+  const confirmSuppression = window.confirm(
+    "Voulez-vous vraiment supprimer ce devoirs ?"
+  );
+  if (!confirmSuppression) return;
+
+  try {
+    await axios.delete(`${API_URL}/devoirs/${devoirsId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  
+
+
+    // ✅ Mise à jour correcte du state
+    setDevoirsClasse((prev) => prev.filter((c) => c._id !== devoirsId));
+
+    alert("✅ devoirs supprimé avec succès !");
+  } catch (err) {
+    console.error("Erreur lors de la suppression du devoir :", err);
+
+    if (err.response?.status === 404) {
+      alert("❌ Devoir introuvable.");
+    } else {
+      alert("❌ Erreur serveur lors de la suppression du devoir.");
+    }
+  }
+};
+
+const demarrerLive = async () => {
+
+  try {
+
+    const res = await axios.post(
+      `${API_URL}/live-cours/start`,
+      {
+        classeId: selectedClasse._id,
+        titre: "Cours en direct",
+        description: "Cours en ligne"
+      },
+      {
+        headers: {
+          Authorization:
+          `Bearer ${localStorage.getItem("token")}`
+        }
+      }
+    );
+
+
+    console.log(
+      "🎥 Live créé :",
+      res.data
+    );
+
+
+    // aller vers la page WebRTC du prof
+
+    navigate(
+      `/live-prof/${selectedClasse._id}`,
+      {
+        state: {
+          liveId: res.data._id
+        }
+      }
+    );
+  /*  navigate(
+      `/live-prof/${selectedClasse._id}`
+    );*/
+
+
+  } catch(error) {
+
+    console.error(
+      "Erreur démarrage live :",
+      error.response?.data || error.message
+    );
+
+  }
+
+};
+
+
+
+useEffect(() => {
+
+  const classeId = selectedClasse?._id;
+
+  const joinRoom = () => {
+
+    console.log(
+      "Socket connecté :",
+      socket.id
+    );
+
+
+    console.log(
+      "Envoi join-room :",
+      classeId
+    );
+
+
+    socket.emit(
+      "join-room",
+      classeId
+    );
+
+  };
+
+
+  if (socket.connected) {
+
+    joinRoom();
+
+  } else {
+
+    socket.on(
+      "connect",
+      joinRoom
+    );
+
+  }
+
+
+  return () => {
+
+    socket.off(
+      "connect",
+      joinRoom
+    );
+
+  };
+
+
+}, [selectedClasse]);
 
   // 🔹 Charger infos du prof et classes au montage
   useEffect(() => {
     fetchClasses();
-    const storedEmail = localStorage.getItem("email");
+   // const storedEmail = localStorage.getItem("email");
+    const storedPrenom = localStorage.getItem("prenom");
+    const storedNom = localStorage.getItem("nom");
     const storedProfId = localStorage.getItem("profId");
-    if (storedEmail) setEmail(storedEmail);
-    if (storedProfId) setProfId(storedProfId);
-  }, []);
+
+   // if (storedEmail) setEmail(storedEmail);
+    if (storedPrenom) setPrenom(storedPrenom);
+    if (storedNom) setNom(storedNom);
+   // if (storedProfId) setProfId(storedProfId);
+  }, [fetchClasses]);
 
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
@@ -133,7 +353,8 @@ const Espaceprofs = () => {
       <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "20px" }}>
         {/* En-tête */}
         <div style={{ marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2>Bienvenue, {email} 👋</h2>
+          <h2>Bienvenue, {prenom} {nom}</h2>
+          {/*<h2>Bienvenue, {prenom} </h2>*/}
           <button
             onClick={() => setShowForm(!showForm)}
             style={{
@@ -164,16 +385,36 @@ const Espaceprofs = () => {
         {/* Sélection classe et menu */}
         {selectedClasse && (
           <div>
-            <nav style={{ display: "flex", gap: "10px", marginBottom: "20px", flexWrap: "wrap" }}>
+            <nav className="nav-boutons">
+  <button onClick={handleBackToList}>Retour à mes classes</button>
+  <button>Liste des élèves</button>
+  <button onClick={() => setShowUploadForm(!showUploadForm)}>
+    {showUploadForm ? "Fermer le formulaire" : "Poster un cours"}
+  </button>
+  <button onClick={() => setShowUploadFormExercices(!showUploadFormExercices)}>
+    {showUploadFormExercices ? "Fermer le formulaire" : "Poster un exercice"}
+  </button>
+  <button onClick={() => setShowUploadFormDevoirs(!showUploadFormDevoirs)}>
+    {showUploadFormDevoirs ? "Fermer le formulaire" : "Poster un devoir"}
+  </button>
+  <button onClick={demarrerLive}>
+  🎥 Cours en ligne
+</button>
+
+</nav>
+            {/*<nav style={{ display: "flex", gap: "10px", marginBottom: "20px", flexWrap: "wrap" }}>
               <button onClick={handleBackToList}>Retour à mes classes</button>
               <button>Liste des élèves</button>
               <button onClick={() => setShowUploadForm(!showUploadForm)}>
                 {showUploadForm ? "Fermer le formulaire" : "Poster un cours"}
               </button>
-              <button>Poster des exercices</button>
+              <button onClick={() => setShowUploadFormExercices(!showUploadFormExercices)}>
+                {showUploadFormExercices ? "Fermer le formulaire" : "Poster un exercice"}
+              </button>
+           
               <button>Poster un devoir</button>
               <button>Poster un Quiz</button>
-            </nav>
+            </nav>*/}
 
             {/* Détail classe */}
             <div className="conteneur-classe-cours">
@@ -187,18 +428,25 @@ const Espaceprofs = () => {
                     {new Date(selectedClasse.createdAt).toLocaleString()}
                   </h2>
                 </div>
-              </div>
-
+            </div>
+      
+    
               {/* Demandes accès */}
               <DemandesAccesProf />
 
               {/* Liste des cours */}
-              <div>
-  <h3>📚 Cours de la classe</h3>
-  {coursClasse.length === 0 ? (
-    <p>Aucun cours pour le moment.</p>
-  ) : (
-    <ul
+             {/*} <ListeCours
+               coursClasse={coursClasse}
+               handleDeleteCours={handleDeleteCours}
+               API_URL={API_URL}
+              
+              />*/}
+             <div>
+                    <h3>📚 Cours de la classe</h3>
+                      {coursClasse.length === 0 ? (
+                      <p>Aucun cours pour le moment.</p>
+                      ) : (
+                          <ul
       style={{
         listStyle: "none",
         padding: 0,
@@ -234,7 +482,8 @@ const Espaceprofs = () => {
               {c.fichiers.map((f, i) => (
                 <a
                   key={i}
-                  href={f.url}
+                  //href={f.url}
+                  href={`${API_URL.replace("/api", "")}/${f.url}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -258,8 +507,6 @@ const Espaceprofs = () => {
 >
   📎 {f.nom || "Ouvrir le fichier"}
 </span>
-
-                  {/*📎 {f.nom || "Ouvrir le fichier"}*/}
                 </a>
               ))}
             </div>
@@ -269,8 +516,6 @@ const Espaceprofs = () => {
             onClick={() => handleDeleteCours(c._id)}
             style={{
               marginTop: "8px",
-              /*backgroundColor: "#dc3545",*/
-              /*color: "#fff",*/
               border: "none",
               padding: "5px 8px",
               borderRadius: "5px",
@@ -285,6 +530,19 @@ const Espaceprofs = () => {
     </ul>
   )}
 </div>
+            <ListeExercices
+               exercicesClasse={exercicesClasse}
+               handleDeleteExercices={handleDeleteExercices}
+               API_URL={API_URL}
+              
+              />
+
+              <ListeDevoirs
+               devoirsClasse={devoirsClasse}
+               handleDeleteDevoirs={handleDeleteDevoirs}
+               API_URL={API_URL}
+              
+              />
 
 
               {/* Formulaire poster un cours */}
@@ -299,9 +557,42 @@ const Espaceprofs = () => {
                   />
                 </div>
               )}
+
+
+              {/* Formulaire poster un exercice */}
+              {showUploadFormExercices && selectedClasse && (
+                <div style={{ marginBottom: "20px" }}>
+                  <PosterExercices
+                    onClose={() => setShowUploadFormExercices(false)}
+                    selectedClasseId={selectedClasse._id}
+                    onExercicesAjoute={(nouveauExercices) =>
+                      setExercicesClasse(prev => [nouveauExercices, ...prev])
+                    }
+                  />
+                </div>
+              )}
+
+
+                 {/* Formulaire poster un devoir */}
+                 {showUploadFormDevoirs && selectedClasse && (
+                <div style={{ marginBottom: "20px" }}>
+                  <PosterDevoirs
+                    onClose={() => setShowUploadFormDevoirs(false)}
+                    selectedClasseId={selectedClasse._id}
+                    onDevoirsAjoute={(nouveauDevoirs) =>
+                      setDevoirsClasse(prev => [nouveauDevoirs, ...prev])
+                    }
+                  />
+                </div>
+              )}
+
+
             </div>
           </div>
         )}
+
+
+
 
         {/* Liste des classes */}
         {!selectedClasse && (
@@ -394,250 +685,6 @@ const Espaceprofs = () => {
 };
 
 export default Espaceprofs;
-
-
-/*import React, { useState, useEffect } from "react";
-import FormulaireClasse from "./FormulaireClasse";
-import axios from "axios";
-import PosterCours from "../components/PosterCours";
-import ListeCours from "../components/ListeCours";
-import DemandesAccesProf from "../components/DemandesAccesProf";
-//import ListeEleves from "../components/ListeEleves";
-
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
-const API_URL_CLASSE = process.env.REACT_APP_API_URL_CLASSE || "http://localhost:5000/api";
-
-const Espaceprofs = () => {
-  const [showForm, setShowForm] = useState(false);
-  const [classes, setClasses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState("");
-  const [profId, setProfId] = useState(null); // ✅ ajouté
-  const [selectedClasse, setSelectedClasse] = useState(null);
-  const [showUploadForm, setShowUploadForm] = useState(false);
-
-  
-
-  // Charger les classes du prof
-  const fetchClasses = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(`${API_URL}/classes/my-classes`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setClasses(res.data.classes);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Charger infos du prof depuis localStorage
-
-  useEffect(() => {
-    fetchClasses();
-    const storedEmail = localStorage.getItem("email");
-    const storedProfId = localStorage.getItem("profId");
-    if (storedEmail) setEmail(storedEmail);
-    if (storedProfId) setProfId(storedProfId);
-  }, []);
-  
-  // Supprimer une classe
-  const handleDelete = async (id) => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`${API_URL_CLASSE}/delete/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setClasses(classes.filter((c) => c._id !== id));
-      if (selectedClasse && selectedClasse._id === id) setSelectedClasse(null);
-    } catch (err) {
-      console.error(err);
-      alert("Erreur lors de la suppression de la classe");
-    }
-  };
-
-  const handleSelectClasse = async (classe) => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(`${API_URL}/classes/${classe._id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setSelectedClasse(res.data.classe);
-    } catch (err) {
-      console.error("Erreur de chargement de la classe:", err);
-    }
-  };
-
-  const handleBackToList = () => setSelectedClasse(null);
-
-  return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>*/
-      {/* 🧭 Menu latéral 
-      <div
-        className="menu-vertical-espaceprofs"
-        style={{
-          width: "220px",
-          background: "#f5f5f5",
-          padding: "20px",
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-        }}
-      >
-        <h3>📋 Menu</h3>
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          <li>🏠 Tableau de bord</li>
-          <li>📚 Mes Classes</li>
-          <li>👩‍🏫 Profil</li>
-          <li>⚙️ Paramètres</li>
-        </ul>
-      </div>*/}
-
-      {/* 🌟 Zone principale 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "20px" }}>*/}
-        {/* En-tête 
-        <div style={{ marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2>Bienvenue, {email} 👋</h2>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            style={{
-              backgroundColor: "#007bff",
-              color: "#fff",
-              border: "none",
-              padding: "10px 16px",
-              borderRadius: "6px",
-              cursor: "pointer",
-            }}
-          >
-            {showForm ? "Fermer le formulaire" : "Créer une classe"}
-          </button>
-        </div>*/}
-
-        {/* Formulaire création classe 
-        {showForm && (
-          <div className="mt-4 p-4 border rounded shadow" style={{ marginBottom: "20px" }}>
-            <FormulaireClasse
-              onClassCreated={() => {
-                setShowForm(false);
-                fetchClasses();
-              }}
-            />
-          </div>
-        )}*/}
-
-            {/* 3️⃣ Menu horizontal pour la classe 
-            {selectedClasse && (
-              <nav style={{ display: "flex", gap: "10px", marginBottom: "20px", flexWrap: "wrap" }}>
-
-                <button onClick={handleBackToList}>Retour à mes classes</button>
-
-                <button>Liste des élèves</button>
-
-                <button onClick={() => setShowUploadForm(!showUploadForm)}>
-                  {showUploadForm ? "Fermer le formulaire" : "Poster un cours"}
-                </button>
-
-                <button>Poster des exercices</button>
-                <button>Poster un devoir</button>
-                <button>Poster un Quiz</button>
-              </nav>
-            )}*/}
-
-        {/* 🌍 Détail d’une classe sélectionnée 
-        <div>
-          {selectedClasse ? (
-            <div>
-              <div className="conteneur-classe-cours">
-                <div className="titre-classe">
-                  <h2>📘 Classe</h2>
-                  <div className="titre">
-                    <h2><strong>{selectedClasse.niveau}</strong> </h2>
-                    <h2> <strong>{selectedClasse.serie}</strong> </h2>
-                    <h2>  <strong>Créée le :</strong>{" "} {new Date(selectedClasse.createdAt).toLocaleString()}</h2>
-                  </div>
-                </div>
-
-                <div>*/}
-                  {/* ...autres composants 
-                  <DemandesAccesProf />
-                </div>
-
-                <div>*/}
-                 {/* Liste des cours 
-                <ListeCours classeId={selectedClasse._id} />
-                </div>
-
-              </div>*/}
-
-              {/* ✅ Liste des élèves avec profId */}
-             {/*{profId ? (
-                <ListeEleves profId={profId} />
-              ) : (
-                <p style={{ color: "red" }}>⚠️ profId introuvable — vérifie le login.</p>
-              )}*/}
-
-              {/* Formulaire upload 
-             {showUploadForm && selectedClasse && (
-                <div style={{ marginBottom: "20px" }}>
-                  <PosterCours onClose={() => setShowUploadForm(false)} 
-                  selectedClasseId={selectedClasse._id}
-                  />
-                </div>
-              )}
-            </div>
-          ) : (
-            <>
-              <h3>📚 Mes Classes</h3>
-              {loading ? (
-                <p>Chargement...</p>
-              ) : classes.length === 0 ? (
-                <p>Aucune classe pour le moment.</p>
-              ) : (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
-                  {classes.map((classe) => (
-                    <div
-                      key={classe._id}
-                      onClick={() => handleSelectClasse(classe)}
-                      style={{
-                        border: "1px solid #ddd",
-                        borderRadius: "8px",
-                        padding: "16px",
-                        width: "1 1 200px",
-                        height: "150px",
-                        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                        backgroundColor: "#fff",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <h4 style={{ display: "flex", gap: "15px" }}>
-                        <p>{classe.niveau}</p> <p>{classe.serie}</p>
-                      </h4>
-                      <p>{classe.description}</p>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(classe._id);
-                        }}
-                      >
-                        Supprimer
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default Espaceprofs;*/}
-
-
 
 
 
