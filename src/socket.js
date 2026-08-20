@@ -6,10 +6,3 @@ const socket = io("https://senecole-back.onrender.com", {
 });
 
 export default socket;
-/*import { io } from "socket.io-client";
-
-
-const socket = io("http://localhost:8989");
-
-
-export default socket;*/
