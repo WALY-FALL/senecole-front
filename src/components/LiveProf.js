@@ -69,6 +69,11 @@ const LiveProf = () => {
       socket.emit("join-room", classeId);
     };
 
+    console.log("🚀 DÉMARRAGE LIVE");
+console.log("profId envoyé :", profId);
+console.log("classeId envoyé :", classeId);
+console.log("localStorage profId :", localStorage.getItem("profId"));
+
     if (socket.connected) {
       rejoindre();
     } else {
