@@ -18,7 +18,7 @@ const LiveProf = () => {
 
   const localVideoRef = useRef(null);
   const localStream = useRef(null);
-  const videoRef = useRef(null);
+  //const videoRef = useRef(null);
   //const [liveId, setLiveId] = useState(null);
 
   // 🔥 Multi connexions
@@ -209,8 +209,10 @@ const LiveProf = () => {
     🧹 CLEANUP
     ============================
     */
+    const currentPeers = peers.current;
     return () => {
 
+      socket.off("connect", rejoindre);
       socket.off("users-in-room");
       socket.off("user-joined");
       socket.off("webrtc-answer");

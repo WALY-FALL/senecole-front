@@ -313,9 +313,9 @@ const LiveEleve = () => {
     CLEANUP
     ========================
     */
-
+    const currentPeers = peers.current;
     return()=>{
-
+      socket.off("connect", rejoindre);
 
       socket.off(
         "users-in-room"
@@ -332,20 +332,22 @@ const LiveEleve = () => {
       );
 
 
-
-      Object.values(
+      Object.values(currentPeers).forEach(pc => {
+        pc.close();
+      });
+     /* Object.values(
         peers.current
       ).forEach(pc=>{
 
         pc.close();
 
-      });
+      });*/
 
 
     };
 
 
-  },[]);
+  },[classeId]);
 
 
 
