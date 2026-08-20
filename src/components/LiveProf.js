@@ -219,7 +219,8 @@ const LiveProf = () => {
       socket.off("webrtc-ice-candidate");
       socket.off("user-left");
 
-      Object.values(peers.current).forEach(pc => pc.close());
+      //Object.values(peers.current).forEach(pc => pc.close());
+      Object.values(currentPeers).forEach(pc => pc.close());
 
       localStream.current?.getTracks().forEach(track => track.stop());
 

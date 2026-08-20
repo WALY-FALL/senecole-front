@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../style/espaceprofs.css";
@@ -35,7 +35,8 @@ const Espaceprofs = () => {
   const token = localStorage.getItem("token");
 
   // 🔹 Charger les classes du prof
-  const fetchClasses = async () => {
+  const fetchClasses = useCallback(async () => {
+
     try {
    
       const res = await axios.get(`${API_URL}/classes/my-classes`, {
@@ -47,7 +48,21 @@ const Espaceprofs = () => {
     } finally {
       setLoading(false);
     }
-  };
+ }, [token]);
+
+  /*const fetchClasses = async () => {
+    try {
+   
+      const res = await axios.get(`${API_URL}/classes/my-classes`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setClasses(res.data.classes || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };*/
 
   // 🔹 Charger les cours d'une classe
   const fetchCoursClasse = async (classeId) => {
@@ -318,7 +333,7 @@ useEffect(() => {
    // const storedEmail = localStorage.getItem("email");
     const storedPrenom = localStorage.getItem("prenom");
     const storedNom = localStorage.getItem("nom");
-    const storedProfId = localStorage.getItem("profId");
+    //const storedProfId = localStorage.getItem("profId");
 
    // if (storedEmail) setEmail(storedEmail);
     if (storedPrenom) setPrenom(storedPrenom);
