@@ -158,66 +158,57 @@ useEffect(() => {
   verifierLive();
 
 }, [classeId]);
-/*useEffect(()=>{
 
-  const verifierLive = async()=>{
+useEffect(() => {
 
-    if(!classeId){
-      console.log("Pas de classe sélectionnée");
-      return;
-     }
-  
-  try{
-  
-  const token = localStorage.getItem("token");
-  
-  console.log(
-    "🔎 Recherche live pour classe :",
-    classeId
-    );
-  const res = await axios.get(
-  `${API_URL}/live-cours/classe/${classeId}`,
-  {
-  headers:{
-  Authorization:`Bearer ${token}`
-  }
-  }
-  );
-  console.log("🔑 TOKEN :", token);
-  
-  console.log(
-  "🎥 Live trouvé :",
-  res.data
-  );
-  
-  
-  if(res.data && res.data.statut==="en_cours"){
-  
-  setLiveActif(res.data);
-  
-  }
+  if (!classeId) return;
 
- 
-  
-  
-  }catch(err){
-  
-  console.log(
-  "Pas de live actif"
-  );
-  
-  }
-  
-  
+  console.log("🚪 Élève rejoint la salle :", classeId);
+
+  socket.emit("join-room", classeId);
+
+  const handleLiveStarted = (data) => {
+
+    console.log("🔥 Nouveau live reçu :", data);
+
+    if (data.classeId === classeId) {
+
+      setLiveActif({
+        _id: data.liveId,
+        classeId: data.classeId,
+        titre: data.titre,
+        statut: "en_cours"
+      });
+
+    }
+
   };
-  
-  
-  verifierLive();
-  
-  
-  },[classeId]);*/
 
-  useEffect(()=>{
+  const handleLiveStopped = (data) => {
+
+    console.log("🛑 Live terminé reçu :", data);
+
+    if (data.classeId === classeId) {
+
+      setLiveActif(null);
+
+    }
+
+  };
+
+  socket.on("live-started", handleLiveStarted);
+  socket.on("live-stopped", handleLiveStopped);
+
+  return () => {
+
+    socket.off("live-started", handleLiveStarted);
+    socket.off("live-stopped", handleLiveStopped);
+
+  };
+
+}, [classeId]);
+
+  /*useEffect(()=>{
 
     socket.on("live-started",
     (data)=>{
@@ -243,9 +234,9 @@ useEffect(() => {
     };
     
     
-    },[classeId]);
+    },[classeId])*/
 
-    useEffect(() => {
+    /*useEffect(() => {
 
       if(!classeId) return;
     
@@ -276,7 +267,7 @@ useEffect(() => {
       };
     
     
-    },[classeId]);
+    },[classeId]);*/
 
     useEffect(()=>{
 

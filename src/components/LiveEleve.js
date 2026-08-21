@@ -17,6 +17,28 @@ const LiveEleve = () => {
 
   const navigate = useNavigate();
 
+  const handleLiveStopped = (data) => {
+
+    console.log("🛑 Le professeur a terminé le live");
+  
+    if (data.classeId !== classeId) return;
+  
+    // Fermer toutes les connexions WebRTC
+    Object.values(peers.current).forEach((pc) => {
+      pc.close();
+    });
+  
+    peers.current = {};
+  
+    // Arrêter la vidéo distante
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = null;
+    }
+  
+    // Retour au dashboard élève
+    navigate("/espace-eleve");
+  };
+
 
   /*
   ============================
@@ -78,6 +100,8 @@ const LiveEleve = () => {
 
       }
     );
+
+    socket.on("live-stopped", handleLiveStopped);
 
 
 
@@ -330,6 +354,8 @@ const LiveEleve = () => {
       socket.off(
         "webrtc-ice-candidate"
       );
+
+      socket.off("live-stopped", handleLiveStopped);
 
 
       Object.values(currentPeers).forEach(pc => {
