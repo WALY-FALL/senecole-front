@@ -255,7 +255,7 @@ console.log("🎥 LIVE ID :", liveId);
       
   
       // Retour à l'espace professeur
-      navigate("/espace-prof");
+      navigate("/espace-prof", { replace: true });
   
     } catch (error) {
   
