@@ -224,6 +224,16 @@ const handleDeleteDevoirs = async (devoirsId) => {
 const demarrerLive = async () => {
 
   try {
+    console.trace("🔥 demarrerLive() APPELÉ");
+
+    const token = localStorage.getItem("token");
+    const profId = localStorage.getItem("profId");
+
+    console.log("🚀 DEMARRAGE DU LIVE");
+    console.log("👨‍🏫 profId :", profId);
+    console.log("🔑 token :", token);
+    console.log("🏫 selectedClasse :", selectedClasse);
+    console.log("🏫 classeId :", selectedClasse?._id);
 
     const res = await axios.post(
       `${API_URL}/live-cours/start`,
@@ -245,6 +255,7 @@ const demarrerLive = async () => {
       "🎥 Live créé :",
       res.data
     );
+    
 
 
     // aller vers la page WebRTC du prof
@@ -275,7 +286,7 @@ const demarrerLive = async () => {
 
 
 
-useEffect(() => {
+/*useEffect(() => {
 
   const classeId = selectedClasse?._id;
 
@@ -325,7 +336,7 @@ useEffect(() => {
   };
 
 
-}, [selectedClasse]);
+}, [selectedClasse]);*/
 
   // 🔹 Charger infos du prof et classes au montage
   useEffect(() => {
