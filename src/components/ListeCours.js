@@ -1,6 +1,6 @@
 import React from "react";
 
-const ListeCours = ({ coursClasse, handleDeleteCours, API_URL }) => {
+const ListeCours = ({ coursClasse, handleDeleteCours }) => {
   return (
     <div>
       <h3>📚 Cours de la classe</h3>
@@ -47,7 +47,8 @@ const ListeCours = ({ coursClasse, handleDeleteCours, API_URL }) => {
                   {c.fichiers.map((f, i) => (
                     <a
                       key={i}
-                      href={`${API_URL.replace("/api", "")}/${f.url}`}
+                      //href={`${API_URL.replace("/api", "")}/${f.url}`}
+                      href={f.url}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
