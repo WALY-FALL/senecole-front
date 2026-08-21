@@ -17,6 +17,16 @@ const LiveEleve = () => {
 
   const navigate = useNavigate();
 
+
+  /*
+  ============================
+  🔌 SOCKET + WEBRTC
+  ============================
+  */
+
+  useEffect(() => {
+
+
   const handleLiveStopped = (data) => {
 
     console.log("🛑 Le professeur a terminé le live");
@@ -39,14 +49,6 @@ const LiveEleve = () => {
     navigate("/espace-eleve");
   };
 
-
-  /*
-  ============================
-  🔌 SOCKET + WEBRTC
-  ============================
-  */
-
-  useEffect(() => {
 
     /*
     ========================
@@ -361,19 +363,12 @@ const LiveEleve = () => {
       Object.values(currentPeers).forEach(pc => {
         pc.close();
       });
-     /* Object.values(
-        peers.current
-      ).forEach(pc=>{
-
-        pc.close();
-
-      });*/
-
-
+  
+   
     };
 
 
-  },[classeId]);
+  },[classeId, navigate]);
 
 
 
