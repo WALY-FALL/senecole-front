@@ -49,7 +49,8 @@ const ListeExercices = ({ exercicesClasse, handleDeleteExercices, API_URL }) => 
                   {c.fichiers.map((f, i) => (
                     <a
                       key={i}
-                      href={`${API_URL.replace("/api", "")}/${f.url}`}
+                      href={f.url}
+                      //href={`${API_URL.replace("/api", "")}/${f.url}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
@@ -93,19 +94,6 @@ const ListeExercices = ({ exercicesClasse, handleDeleteExercices, API_URL }) => 
   </button>
 )}
 
-          {/*<button
-                onClick={() => handleDeleteExercices(c._id)}
-                style={{
-                  marginTop: "8px",
-                  border: "none",
-                  padding: "5px 8px",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                  fontSize: "12px",
-                }}
-              >
-                🗑 Supprimer
-              </button>*/}
             </li>
           ))}
         </ul>
