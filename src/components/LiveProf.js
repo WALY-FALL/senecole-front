@@ -252,6 +252,7 @@ console.log("🎥 LIVE ID :", liveId);
       );
   
       console.log("✅ Live terminé :", res.data);
+      
   
       // Retour à l'espace professeur
       navigate("/espace-prof");
@@ -264,6 +265,17 @@ console.log("🎥 LIVE ID :", liveId);
       );
   
     }
+
+    const token = localStorage.getItem("token");
+
+try {
+  const payload = JSON.parse(atob(token.split(".")[1]));
+
+  console.log("🔐 PROF ID DANS TOKEN :", payload.profId);
+  console.log("👨‍🏫 PROF ID LOCALSTORAGE :", localStorage.getItem("profId"));
+} catch (e) {
+  console.error("❌ Impossible de décoder le token :", e);
+}
   };
 
 
