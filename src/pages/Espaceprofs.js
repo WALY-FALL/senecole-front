@@ -508,8 +508,8 @@ const demarrerLive = async () => {
               {c.fichiers.map((f, i) => (
                 <a
                   key={i}
-                  //href={f.url}
-                  href={`${API_URL.replace("/api", "")}/${f.url}`}
+                  href={f.url}
+                  //href={`${API_URL.replace("/api", "")}/${f.url}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
