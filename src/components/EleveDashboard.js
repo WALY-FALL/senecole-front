@@ -291,6 +291,181 @@ useEffect(() => {
 
 
   // ✅ Quand l'élève choisit une classe
+
+  const handleChoisirClasse = async (classeIdChoisie) => {
+    try {
+      const eleveId = localStorage.getItem("eleveId");
+  
+      const profId =
+        profSelectionne?._id ||
+        localStorage.getItem("profId");
+  
+      if (!eleveId || !profId || !classeIdChoisie) {
+        console.warn("❌ Données manquantes :", {
+          eleveId,
+          profId,
+          classeIdChoisie
+        });
+  
+        alert("Erreur : informations manquantes. Reconnecte-toi.");
+        return;
+      }
+  
+      console.log("👨‍🏫 Prof sélectionné :", profId);
+      console.log("🏫 Classe choisie :", classeIdChoisie);
+  
+      // ==========================================
+      // 1️⃣ Vérifier les demandes existantes
+      // ==========================================
+  
+      const verif = await axios.get(
+        `${API_URL}/demandes/eleve/${eleveId}`
+      );
+  
+      console.log(
+        "📋 Réponse demandes :",
+        verif.data
+      );
+  
+      // Le backend peut renvoyer :
+      // { statut: "aucune_demande" }
+      // ou un tableau de demandes
+  
+      const demandes = Array.isArray(verif.data)
+        ? verif.data
+        : [];
+  
+      console.log(
+        "📋 Demandes utilisables :",
+        demandes
+      );
+  
+      // ==========================================
+      // 2️⃣ Chercher une demande pour CE prof
+      // ==========================================
+  
+      const demandeProf = demandes.find(
+        (demande) =>
+          demande.profId?._id === profId ||
+          demande.profId === profId
+      );
+  
+      console.log(
+        "🔎 Demande pour ce professeur :",
+        demandeProf
+      );
+  
+      // ==========================================
+      // 3️⃣ Une demande existe déjà
+      // ==========================================
+  
+      if (demandeProf) {
+  
+        // ✅ Demande acceptée
+        if (demandeProf.statut === "accepte") {
+  
+          const classeExistante =
+            demandeProf.classeId?._id ||
+            demandeProf.classeId;
+  
+          console.log(
+            "✅ Accès déjà accepté :",
+            classeExistante
+          );
+  
+          localStorage.setItem(
+            `classe_${profId}`,
+            classeExistante
+          );
+  
+          localStorage.setItem(
+            "classeId",
+            classeExistante
+          );
+  
+          setClasseId(classeExistante);
+          setHasChosen(true);
+  
+          return;
+        }
+  
+        // ⏳ Demande en attente
+        if (demandeProf.statut === "en_attente") {
+  
+          alert(
+            "⏳ Votre demande pour ce professeur est encore en attente."
+          );
+  
+          return;
+        }
+  
+        // ❌ Demande refusée
+        if (demandeProf.statut === "refuse") {
+  
+          alert(
+            "❌ Votre demande pour ce professeur a été refusée."
+          );
+  
+          return;
+        }
+      }
+  
+      // ==========================================
+      // 4️⃣ Aucune demande → créer la demande
+      // ==========================================
+  
+      console.log(
+        "📤 Aucune demande trouvée → création..."
+      );
+  
+      const res = await axios.post(
+        `${API_URL}/demandes/demande`,
+        {
+          eleveId,
+          profId,
+          classeId: classeIdChoisie
+        }
+      );
+  
+      console.log(
+        "📤 Nouvelle demande créée :",
+        res.data
+      );
+  
+      // ==========================================
+      // 5️⃣ Demande créée
+      // ==========================================
+  
+      if (res.data) {
+  
+        localStorage.setItem(
+          `classe_${profId}`,
+          classeIdChoisie
+        );
+  
+        setClasseId(classeIdChoisie);
+  
+        // ⚠️ Pas encore accepté par le prof
+        setHasChosen(false);
+  
+        alert(
+          "✅ Demande envoyée. En attente de validation du professeur."
+        );
+      }
+  
+    } catch (err) {
+  
+      console.error(
+        "❌ Erreur lors de la demande d'accès :",
+        err.response?.data || err
+      );
+  
+      alert(
+        err.response?.data?.message ||
+        "Erreur lors de la demande."
+      );
+    }
+  };
   /*const handleChoisirClasse = async (classeIdChoisie) => {
     try {
       const eleveId = localStorage.getItem("eleveId");
@@ -435,7 +610,7 @@ useEffect(() => {
       );
     }
   };*/
-  const handleChoisirClasse = async (classeIdChoisie) => {
+  /*const handleChoisirClasse = async (classeIdChoisie) => {
     try {
       const eleveId = localStorage.getItem("eleveId");
       const profId = profSelectionne?._id || localStorage.getItem("profId");
@@ -477,7 +652,7 @@ useEffect(() => {
       console.error("Erreur lors de la demande d'accès :", err);
       alert("Une seule classe par professeur.");
     }
-  };
+  };*/
   
 
 
