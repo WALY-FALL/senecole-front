@@ -62,16 +62,55 @@ useEffect(() => {
   }
 }, []);
 
-
-
 useEffect(() => {
   const storedEleveId = localStorage.getItem("eleveId");
   const storedProfId = localStorage.getItem("profId");
   const storedClasseId = localStorage.getItem("classeId");
 
+  if (!storedEleveId) {
+    console.warn("⚠️ Aucun eleveId trouvé");
+    return;
+  }
+
+  console.log("🔄 Restauration session élève");
+  console.log("Prof ID :", storedProfId);
+  console.log("Classe ID :", storedClasseId);
+
+  if (storedProfId && storedClasseId) {
+    setClasseId(storedClasseId);
+    setHasChosen(true);
+  }
+}, []);
+
+useEffect(() => {
+  const storedProfId = localStorage.getItem("profId");
+
+  if (!storedProfId || !profs.length) {
+    return;
+  }
+
+  const prof = profs.find(
+    (p) => p._id === storedProfId
+  );
+
+  if (prof) {
+    console.log("✅ Professeur restauré :", prof);
+
+    setProfSelectionne(prof);
+  } else {
+    console.warn(
+      "⚠️ Professeur enregistré introuvable :",
+      storedProfId
+    );
+  }
+}, [profs]);
+
+/*useEffect(() => {
+  const storedEleveId = localStorage.getItem("eleveId");
+  const storedProfId = localStorage.getItem("profId");
+  const storedClasseId = localStorage.getItem("classeId");
+
   if (storedEleveId) {
-    //setEleveId(storedEleveId);
-    //setProfId(storedProfId);
     setClasseId(storedClasseId);
     if (storedProfId && storedClasseId) {
       setHasChosen(true);
@@ -79,7 +118,7 @@ useEffect(() => {
   } else {
     console.warn("⚠️ Aucun eleveId trouvé dans le localStorage");
   }
-}, []);
+}, []);*/
 
 useEffect(() => {
   console.log("🚨 USEEFFECT LIVE EXÉCUTÉ");
@@ -298,6 +337,150 @@ useEffect(() => {
   const handleChoisirClasse = async (classeIdChoisie) => {
     try {
       const eleveId = localStorage.getItem("eleveId");
+  
+      const profId =
+        profSelectionne?._id ||
+        localStorage.getItem("profId");
+  
+      if (!eleveId || !profId || !classeIdChoisie) {
+        console.warn("❌ Données manquantes :", {
+          eleveId,
+          profId,
+          classeIdChoisie
+        });
+  
+        alert("Erreur : informations manquantes.");
+        return;
+      }
+  
+      console.log("👨‍🏫 Prof sélectionné :", profId);
+      console.log("🏫 Classe choisie :", classeIdChoisie);
+  
+      // ==========================================
+      // 1️⃣ Récupérer toutes les demandes de l'élève
+      // ==========================================
+  
+      const verif = await axios.get(
+        `${API_URL}/demandes/eleve/${eleveId}`
+      );
+  
+      const demandes = verif.data;
+  
+      console.log("📋 Demandes de l'élève :", demandes);
+  
+      // ==========================================
+      // 2️⃣ Chercher la demande pour CE professeur
+      // ==========================================
+  
+      const demandeProf = demandes.find(
+        (demande) =>
+          demande.profId?._id === profId
+      );
+  
+      console.log(
+        "🔎 Demande pour ce professeur :",
+        demandeProf
+      );
+  
+      // ==========================================
+      // 3️⃣ Une classe existe déjà pour ce prof
+      // ==========================================
+  
+      if (demandeProf) {
+  
+        if (demandeProf.statut === "accepte") {
+  
+          const classeExistante =
+            demandeProf.classeId?._id;
+  
+          console.log(
+            "✅ Accès déjà accepté",
+            classeExistante
+          );
+  
+          localStorage.setItem(
+            "classeId",
+            classeExistante
+          );
+  
+          setClasseId(classeExistante);
+          setHasChosen(true);
+  
+          return;
+        }
+  
+        if (demandeProf.statut === "en_attente") {
+  
+          alert(
+            "⏳ Votre demande pour ce professeur est encore en attente."
+          );
+  
+          return;
+        }
+  
+        if (demandeProf.statut === "refuse") {
+  
+          alert(
+            "❌ Votre demande pour ce professeur a été refusée."
+          );
+  
+          return;
+        }
+      }
+  
+      // ==========================================
+      // 4️⃣ Aucun accès pour ce professeur
+      // ==========================================
+  
+      const res = await axios.post(
+        `${API_URL}/demandes/demande`,
+        {
+          eleveId,
+          profId,
+          classeId: classeIdChoisie
+        }
+      );
+  
+      console.log(
+        "📤 Nouvelle demande créée :",
+        res.data
+      );
+  
+      if (res.data) {
+  
+        // ⚠️ Ne pas utiliser seulement "classeId"
+        // pour représenter tous les professeurs.
+  
+        localStorage.setItem(
+          `classe_${profId}`,
+          classeIdChoisie
+        );
+  
+        setClasseId(classeIdChoisie);
+  
+        setHasChosen(false);
+  
+        alert(
+          "✅ Demande envoyée. En attente de validation du professeur."
+        );
+      }
+  
+    } catch (err) {
+  
+      console.error(
+        "❌ Erreur lors de la demande d'accès :",
+        err.response?.data || err
+      );
+  
+      alert(
+        err.response?.data?.message ||
+        "Erreur lors de la demande."
+      );
+    }
+  };
+  /*const handleChoisirClasse = async (classeIdChoisie) => {
+    try {
+      const eleveId = localStorage.getItem("eleveId");
       const profId = profSelectionne?._id || localStorage.getItem("profId");
   
       if (!eleveId || !profId || !classeIdChoisie) {
@@ -337,7 +520,7 @@ useEffect(() => {
       console.error("Erreur lors de la demande d'accès :", err);
       alert("Une seule classe par professeur.");
     }
-  };
+  };*/
   
 
 
