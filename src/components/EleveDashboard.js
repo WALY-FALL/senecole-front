@@ -62,49 +62,6 @@ useEffect(() => {
   }
 }, []);
 
-/*useEffect(() => {
-  const storedEleveId = localStorage.getItem("eleveId");
-  const storedProfId = localStorage.getItem("profId");
-  const storedClasseId = localStorage.getItem("classeId");
-
-  if (!storedEleveId) {
-    console.warn("⚠️ Aucun eleveId trouvé");
-    return;
-  }
-
-  console.log("🔄 Restauration session élève");
-  console.log("Prof ID :", storedProfId);
-  console.log("Classe ID :", storedClasseId);
-
-  if (storedProfId && storedClasseId) {
-    setClasseId(storedClasseId);
-    setHasChosen(true);
-  }
-}, []);
-
-useEffect(() => {
-  const storedProfId = localStorage.getItem("profId");
-
-  if (!storedProfId || !profs.length) {
-    return;
-  }
-
-  const prof = profs.find(
-    (p) => p._id === storedProfId
-  );
-
-  if (prof) {
-    console.log("✅ Professeur restauré :", prof);
-
-    setProfSelectionne(prof);
-  } else {
-    console.warn(
-      "⚠️ Professeur enregistré introuvable :",
-      storedProfId
-    );
-  }
-}, [profs]);*/
-
 useEffect(() => {
   const storedEleveId = localStorage.getItem("eleveId");
   const storedProfId = localStorage.getItem("profId");
@@ -334,7 +291,7 @@ useEffect(() => {
 
 
   // ✅ Quand l'élève choisit une classe
-  const handleChoisirClasse = async (classeIdChoisie) => {
+  /*const handleChoisirClasse = async (classeIdChoisie) => {
     try {
       const eleveId = localStorage.getItem("eleveId");
   
@@ -477,8 +434,8 @@ useEffect(() => {
         "Erreur lors de la demande."
       );
     }
-  };
-  /*const handleChoisirClasse = async (classeIdChoisie) => {
+  };*/
+  const handleChoisirClasse = async (classeIdChoisie) => {
     try {
       const eleveId = localStorage.getItem("eleveId");
       const profId = profSelectionne?._id || localStorage.getItem("profId");
@@ -520,7 +477,7 @@ useEffect(() => {
       console.error("Erreur lors de la demande d'accès :", err);
       alert("Une seule classe par professeur.");
     }
-  };*/
+  };
   
 
 
