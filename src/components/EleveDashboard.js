@@ -311,38 +311,21 @@ useEffect(() => {
         return;
       }
   
+      console.log("🔥 VERSION ACTUELLE handleChoisirClasse");
       console.log("👨‍🏫 Prof sélectionné :", profId);
       console.log("🏫 Classe choisie :", classeIdChoisie);
-  
-      // ==========================================
-      // 1️⃣ Vérifier les demandes existantes
-      // ==========================================
   
       const verif = await axios.get(
         `${API_URL}/demandes/eleve/${eleveId}`
       );
   
-      console.log(
-        "📋 Réponse demandes :",
-        verif.data
-      );
-  
-      // Le backend peut renvoyer :
-      // { statut: "aucune_demande" }
-      // ou un tableau de demandes
+      console.log("📋 Réponse demandes :", verif.data);
   
       const demandes = Array.isArray(verif.data)
         ? verif.data
         : [];
   
-      console.log(
-        "📋 Demandes utilisables :",
-        demandes
-      );
-  
-      // ==========================================
-      // 2️⃣ Chercher une demande pour CE prof
-      // ==========================================
+      console.log("📋 Demandes utilisables :", demandes);
   
       const demandeProf = demandes.find(
         (demande) =>
@@ -355,13 +338,8 @@ useEffect(() => {
         demandeProf
       );
   
-      // ==========================================
-      // 3️⃣ Une demande existe déjà
-      // ==========================================
-  
       if (demandeProf) {
   
-        // ✅ Demande acceptée
         if (demandeProf.statut === "accepte") {
   
           const classeExistante =
@@ -389,30 +367,20 @@ useEffect(() => {
           return;
         }
   
-        // ⏳ Demande en attente
         if (demandeProf.statut === "en_attente") {
-  
           alert(
             "⏳ Votre demande pour ce professeur est encore en attente."
           );
-  
           return;
         }
   
-        // ❌ Demande refusée
         if (demandeProf.statut === "refuse") {
-  
           alert(
             "❌ Votre demande pour ce professeur a été refusée."
           );
-  
           return;
         }
       }
-  
-      // ==========================================
-      // 4️⃣ Aucune demande → créer la demande
-      // ==========================================
   
       console.log(
         "📤 Aucune demande trouvée → création..."
@@ -432,26 +400,17 @@ useEffect(() => {
         res.data
       );
   
-      // ==========================================
-      // 5️⃣ Demande créée
-      // ==========================================
+      localStorage.setItem(
+        `classe_${profId}`,
+        classeIdChoisie
+      );
   
-      if (res.data) {
+      setClasseId(classeIdChoisie);
+      setHasChosen(false);
   
-        localStorage.setItem(
-          `classe_${profId}`,
-          classeIdChoisie
-        );
-  
-        setClasseId(classeIdChoisie);
-  
-        // ⚠️ Pas encore accepté par le prof
-        setHasChosen(false);
-  
-        alert(
-          "✅ Demande envoyée. En attente de validation du professeur."
-        );
-      }
+      alert(
+        "✅ Demande envoyée. En attente de validation du professeur."
+      );
   
     } catch (err) {
   
@@ -466,197 +425,6 @@ useEffect(() => {
       );
     }
   };
-  /*const handleChoisirClasse = async (classeIdChoisie) => {
-    try {
-      const eleveId = localStorage.getItem("eleveId");
-  
-      const profId =
-        profSelectionne?._id ||
-        localStorage.getItem("profId");
-  
-      if (!eleveId || !profId || !classeIdChoisie) {
-        console.warn("❌ Données manquantes :", {
-          eleveId,
-          profId,
-          classeIdChoisie
-        });
-  
-        alert("Erreur : informations manquantes.");
-        return;
-      }
-  
-      console.log("👨‍🏫 Prof sélectionné :", profId);
-      console.log("🏫 Classe choisie :", classeIdChoisie);
-  
-      // ==========================================
-      // 1️⃣ Récupérer toutes les demandes de l'élève
-      // ==========================================
-  
-      const verif = await axios.get(
-        `${API_URL}/demandes/eleve/${eleveId}`
-      );
-  
-      const demandes = verif.data;
-  
-      console.log("📋 Demandes de l'élève :", demandes);
-  
-      // ==========================================
-      // 2️⃣ Chercher la demande pour CE professeur
-      // ==========================================
-  
-      const demandeProf = demandes.find(
-        (demande) =>
-          demande.profId?._id === profId
-      );
-  
-      console.log(
-        "🔎 Demande pour ce professeur :",
-        demandeProf
-      );
-  
-      // ==========================================
-      // 3️⃣ Une classe existe déjà pour ce prof
-      // ==========================================
-  
-      if (demandeProf) {
-  
-        if (demandeProf.statut === "accepte") {
-  
-          const classeExistante =
-            demandeProf.classeId?._id;
-  
-          console.log(
-            "✅ Accès déjà accepté",
-            classeExistante
-          );
-  
-          localStorage.setItem(
-            "classeId",
-            classeExistante
-          );
-  
-          setClasseId(classeExistante);
-          setHasChosen(true);
-  
-          return;
-        }
-  
-        if (demandeProf.statut === "en_attente") {
-  
-          alert(
-            "⏳ Votre demande pour ce professeur est encore en attente."
-          );
-  
-          return;
-        }
-  
-        if (demandeProf.statut === "refuse") {
-  
-          alert(
-            "❌ Votre demande pour ce professeur a été refusée."
-          );
-  
-          return;
-        }
-      }
-  
-      // ==========================================
-      // 4️⃣ Aucun accès pour ce professeur
-      // ==========================================
-  
-      const res = await axios.post(
-        `${API_URL}/demandes/demande`,
-        {
-          eleveId,
-          profId,
-          classeId: classeIdChoisie
-        }
-      );
-  
-      console.log(
-        "📤 Nouvelle demande créée :",
-        res.data
-      );
-  
-      if (res.data) {
-  
-        // ⚠️ Ne pas utiliser seulement "classeId"
-        // pour représenter tous les professeurs.
-  
-        localStorage.setItem(
-          `classe_${profId}`,
-          classeIdChoisie
-        );
-  
-        setClasseId(classeIdChoisie);
-  
-        setHasChosen(false);
-  
-        alert(
-          "✅ Demande envoyée. En attente de validation du professeur."
-        );
-      }
-  
-    } catch (err) {
-  
-      console.error(
-        "❌ Erreur lors de la demande d'accès :",
-        err.response?.data || err
-      );
-  
-      alert(
-        err.response?.data?.message ||
-        "Erreur lors de la demande."
-      );
-    }
-  };*/
-  /*const handleChoisirClasse = async (classeIdChoisie) => {
-    try {
-      const eleveId = localStorage.getItem("eleveId");
-      const profId = profSelectionne?._id || localStorage.getItem("profId");
-  
-      if (!eleveId || !profId || !classeIdChoisie) {
-        console.warn("❌ Données manquantes :", { eleveId, profId, classeIdChoisie });
-        alert("Erreur : informations manquantes. Reconnecte-toi.");
-        return;
-      }
-  
-      // 1️⃣ Vérifier si l'élève a déjà accès à cette classe pour ce prof
-      const verif = await axios.get(`${API_URL}/demandes/eleve/${eleveId}`);
-  
-      if (verif.data.statut === "accepte" && verif.data.classeId === classeIdChoisie) {
-        // Accès déjà accepté → on active la classe directement
-        localStorage.setItem("classeId", classeIdChoisie);
-        setClasseId(classeIdChoisie);
-        setHasChosen(true);
-        return;
-      }
-  
-      // 2️⃣ Sinon → envoyer une nouvelle demande
-      const res = await axios.post(`${API_URL}/demandes/demande`, {
-        eleveId,
-        profId,
-        classeId: classeIdChoisie,
-      });
-  
-      if (res.data.success) {
-        // Sauvegarder la classe choisie pour ce prof
-        localStorage.setItem(`classe_${profId}`, classeIdChoisie);
-        setClasseId(classeIdChoisie);
-        setHasChosen(false); // en attente d'acceptation
-        alert("✅ Demande envoyée. En attente de validation du professeur.");
-      } else {
-        alert(res.data.message || "Erreur lors de l’envoi de la demande.");
-      }
-    } catch (err) {
-      console.error("Erreur lors de la demande d'accès :", err);
-      alert("Une seule classe par professeur.");
-    }
-  };*/
-  
-
-
-
   
 console.log("LIVE ACTIF :", liveActif);
 console.log("Statut :", liveActif?.statut);
