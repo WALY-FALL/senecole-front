@@ -46,7 +46,7 @@ const LiveEleve = () => {
     }
   
     // Retour au dashboard élève
-    navigate("/espace-eleve");
+    //navigate("/espace-eleve");
   };
 
 
