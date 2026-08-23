@@ -62,7 +62,7 @@ useEffect(() => {
   }
 }, []);
 
-useEffect(() => {
+/*useEffect(() => {
   const storedEleveId = localStorage.getItem("eleveId");
   const storedProfId = localStorage.getItem("profId");
   const storedClasseId = localStorage.getItem("classeId");
@@ -103,9 +103,9 @@ useEffect(() => {
       storedProfId
     );
   }
-}, [profs]);
+}, [profs]);*/
 
-/*useEffect(() => {
+useEffect(() => {
   const storedEleveId = localStorage.getItem("eleveId");
   const storedProfId = localStorage.getItem("profId");
   const storedClasseId = localStorage.getItem("classeId");
@@ -118,7 +118,7 @@ useEffect(() => {
   } else {
     console.warn("⚠️ Aucun eleveId trouvé dans le localStorage");
   }
-}, []);*/
+}, []);
 
 useEffect(() => {
   console.log("🚨 USEEFFECT LIVE EXÉCUTÉ");
