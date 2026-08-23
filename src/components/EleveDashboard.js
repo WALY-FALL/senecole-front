@@ -319,7 +319,7 @@ useEffect(() => {
       // ==========================================
   
       const verif = await axios.get(
-        `${API_URL}/demandes/eleve/${eleveId}`
+        `${API_URL}/demandes/all/${eleveId}`
       );
   
       console.log(
