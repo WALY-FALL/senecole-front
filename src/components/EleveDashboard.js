@@ -291,7 +291,6 @@ useEffect(() => {
 
 
   // ✅ Quand l'élève choisit une classe
-
   const handleChoisirClasse = async (classeIdChoisie) => {
     try {
       const eleveId = localStorage.getItem("eleveId");
@@ -315,101 +314,139 @@ useEffect(() => {
       console.log("👨‍🏫 Prof sélectionné :", profId);
       console.log("🏫 Classe choisie :", classeIdChoisie);
   
+      // ==========================================
+      // 1️⃣ Vérifier la demande existante
+      // ==========================================
+  
       const verif = await axios.get(
         `${API_URL}/demandes/eleve/${eleveId}`
       );
   
-      console.log("📋 Réponse demandes :", verif.data);
-  
-      const demandes = Array.isArray(verif.data)
-        ? verif.data
-        : [];
-  
-      console.log("📋 Demandes utilisables :", demandes);
-  
-      const demandeProf = demandes.find(
-        (demande) =>
-          demande.profId?._id === profId ||
-          demande.profId === profId
+      console.log(
+        "📋 Réponse demandes :",
+        verif.data
       );
+  
+      // ==========================================
+      // 2️⃣ Le backend renvoie directement le statut
+      // ==========================================
+  
+      const demande = verif.data;
   
       console.log(
-        "🔎 Demande pour ce professeur :",
-        demandeProf
+        "🔎 Demande actuelle :",
+        demande
       );
   
-      if (demandeProf) {
+      // ==========================================
+      // 3️⃣ Demande acceptée
+      // ==========================================
   
-        if (demandeProf.statut === "accepte") {
+      if (demande?.statut === "accepte") {
   
-          const classeExistante =
-            demandeProf.classeId?._id ||
-            demandeProf.classeId;
+        const classeExistante = demande.classeId;
   
-          console.log(
-            "✅ Accès déjà accepté :",
-            classeExistante
-          );
+        console.log(
+          "✅ Accès déjà accepté :",
+          classeExistante
+        );
   
-          localStorage.setItem(
-            `classe_${profId}`,
-            classeExistante
-          );
+        // Sauvegarder la classe pour CE professeur
+        localStorage.setItem(
+          `classe_${profId}`,
+          classeExistante
+        );
   
-          localStorage.setItem(
-            "classeId",
-            classeExistante
-          );
+        // Pour le fonctionnement actuel du Dashboard
+        localStorage.setItem(
+          "classeId",
+          classeExistante
+        );
   
-          setClasseId(classeExistante);
-          setHasChosen(true);
+        setClasseId(classeExistante);
+        setHasChosen(true);
   
-          return;
-        }
-  
-        if (demandeProf.statut === "en_attente") {
-          alert(
-            "⏳ Votre demande pour ce professeur est encore en attente."
-          );
-          return;
-        }
-  
-        if (demandeProf.statut === "refuse") {
-          alert(
-            "❌ Votre demande pour ce professeur a été refusée."
-          );
-          return;
-        }
+        return;
       }
   
-      console.log(
-        "📤 Aucune demande trouvée → création..."
-      );
+      // ==========================================
+      // 4️⃣ Demande en attente
+      // ==========================================
   
-      const res = await axios.post(
-        `${API_URL}/demandes/demande`,
-        {
-          eleveId,
-          profId,
-          classeId: classeIdChoisie
-        }
-      );
+      if (demande?.statut === "en_attente") {
   
-      console.log(
-        "📤 Nouvelle demande créée :",
-        res.data
-      );
+        alert(
+          "⏳ Votre demande pour ce professeur est encore en attente."
+        );
   
-      localStorage.setItem(
-        `classe_${profId}`,
-        classeIdChoisie
-      );
+        return;
+      }
   
-      setClasseId(classeIdChoisie);
-      setHasChosen(false);
+      // ==========================================
+      // 5️⃣ Demande refusée
+      // ==========================================
+  
+      if (demande?.statut === "refuse") {
+  
+        alert(
+          "❌ Votre demande pour ce professeur a été refusée."
+        );
+  
+        return;
+      }
+  
+      // ==========================================
+      // 6️⃣ Aucune demande
+      // ==========================================
+  
+      if (demande?.statut === "aucune_demande") {
+  
+        console.log(
+          "📤 Aucune demande trouvée → création..."
+        );
+  
+        const res = await axios.post(
+          `${API_URL}/demandes/demande`,
+          {
+            eleveId,
+            profId,
+            classeId: classeIdChoisie
+          }
+        );
+  
+        console.log(
+          "📤 Nouvelle demande créée :",
+          res.data
+        );
+  
+        localStorage.setItem(
+          `classe_${profId}`,
+          classeIdChoisie
+        );
+  
+        setClasseId(classeIdChoisie);
+  
+        // En attente de l'acceptation du professeur
+        setHasChosen(false);
+  
+        alert(
+          "✅ Demande envoyée. En attente de validation du professeur."
+        );
+  
+        return;
+      }
+  
+      // ==========================================
+      // 7️⃣ Réponse inattendue
+      // ==========================================
+  
+      console.warn(
+        "⚠️ Réponse inattendue du serveur :",
+        demande
+      );
   
       alert(
-        "✅ Demande envoyée. En attente de validation du professeur."
+        "Impossible de déterminer l'état de votre demande."
       );
   
     } catch (err) {
@@ -425,7 +462,6 @@ useEffect(() => {
       );
     }
   };
-  
 console.log("LIVE ACTIF :", liveActif);
 console.log("Statut :", liveActif?.statut);
 console.log("Classe :", classeId);
