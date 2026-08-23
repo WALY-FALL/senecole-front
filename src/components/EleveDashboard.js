@@ -17,8 +17,8 @@ const EleveDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [profSelectionne, setProfSelectionne] = useState(null);
-  const [eleveId, setEleveId] = useState(null);
-  const [profId, setProfId] = useState(null);
+  //const [eleveId, setEleveId] = useState(null);
+  //const [profId, setProfId] = useState(null);
   const [classeId, setClasseId] = useState(null); // ✅ manquant
   const [hasChosen, setHasChosen] = useState(false); // ✅ manquant
   const [liveActif,setLiveActif] = useState(null);
