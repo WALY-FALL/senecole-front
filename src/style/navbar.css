@@ -95,6 +95,14 @@ html, body {
   border-radius: 3px;
 }
 
+.bouton-deconnexion {
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+
 /* ===========================
       MOBILE RESPONSIVE
 =========================== */
