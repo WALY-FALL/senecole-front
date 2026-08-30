@@ -60,7 +60,7 @@ const FormulaireClasse=({ onClassCreated })=>{
         //required
       />
       <textarea
-          placeholder="Description/Etablissement"
+          placeholder="Etablissement"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           required
