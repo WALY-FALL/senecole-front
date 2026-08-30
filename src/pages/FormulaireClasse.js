@@ -54,13 +54,13 @@ const FormulaireClasse=({ onClassCreated })=>{
       <input 
       className="formulaire-input"
         type="text"
-        placeholder="Série"
+        placeholder="Série/autre"
         value={serie}
         onChange={(e) => setSerie(e.target.value)}
         //required
       />
       <textarea
-          placeholder="Description"
+          placeholder="Description/Etablissement"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           required
