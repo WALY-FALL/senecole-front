@@ -82,6 +82,7 @@ const LiveEleve = () => {
 
     socket.on("users-in-room", (liste)=>{
         console.log("📥 USERS :",liste);
+        setUsers(liste);
       });
 
     socket.on("live-stopped", handleLiveStopped);
