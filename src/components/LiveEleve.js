@@ -60,11 +60,7 @@ const LiveEleve = () => {
 
       console.log("🚀 Élève join envoyé");
 
-      socket.emit(
-        "join-room",
-        classeId
-      );
-
+      socket.emit("join-room",classeId);
     };
 
 
@@ -74,14 +70,9 @@ const LiveEleve = () => {
 
     }else{
 
-      socket.once(
-        "connect",
-        rejoindre
-      );
+      socket.once("connect",rejoindre);
 
     }
-
-
 
     /*
     ========================
@@ -89,23 +80,11 @@ const LiveEleve = () => {
     ========================
     */
 
-    socket.on(
-      "users-in-room",
-      (liste)=>{
-
-        console.log(
-          "📥 USERS :",
-          liste
-        );
-
-        setUsers(liste);
-
-      }
-    );
+    socket.on("users-in-room", (liste)=>{
+        console.log("📥 USERS :",liste);
+      });
 
     socket.on("live-stopped", handleLiveStopped);
-
-
 
     /*
     ========================
@@ -113,24 +92,172 @@ const LiveEleve = () => {
     ========================
     */
 
-
     socket.on(
       "webrtc-offer",
-      async({offer, from})=>{
-
-
+      async ({ offer, from }) => {
+    
         console.log(
           "📥 OFFER reçue du prof :",
           from
         );
+    
+        /*
+        =========================
+        🔗 CREATION PEER
+        =========================
+        */
+    
+        const pc = new RTCPeerConnection({
+          iceServers: [
+            {
+              urls: "stun:stun.l.google.com:19302"
+            }
+          ]
+        });
+    
+        peers.current[from] = pc;
+    
+    
+        /*
+        =========================
+        🎤🎥 MICRO + CAMÉRA ÉLÈVE
+        =========================
+        */
+    
+        try {
+    
+          const stream =
+            await navigator.mediaDevices.getUserMedia({
+              video: true,
+              audio: true
+            });
+    
+          console.log("🎤🎥 Micro + caméra élève OK");
+    
+          stream.getTracks().forEach((track) => {
+    
+            pc.addTrack(track, stream);
+    
+            console.log(
+              "📡 Track élève ajoutée :",
+              track.kind
+            );
+    
+          });
+    
+        } catch (err) {
+    
+          console.error(
+            "❌ Erreur micro/caméra élève :",
+            err
+          );
+    
+        }
+    
+    
+        /*
+        =========================
+        🎥 RECEVOIR PROF
+        =========================
+        */
+    
+        pc.ontrack = (event) => {
+    
+          console.log(
+            "🎥 Flux du prof reçu"
+          );
+    
+          const stream =
+            event.streams[0];
+    
+          if (remoteVideoRef.current) {
+    
+            remoteVideoRef.current.srcObject =
+              stream;
+    
+            console.log(
+              "✅ Flux du prof attaché"
+            );
+    
+          }
+    
+        };
+    
+    
+        /*
+        =========================
+        📡 ICE ÉLÈVE
+        =========================
+        */
+    
+        pc.onicecandidate = (event) => {
+    
+          if (event.candidate) {
+    
+            socket.emit(
+              "webrtc-ice-candidate",
+              {
+                candidate: event.candidate,
+                to: from
+              }
+            );
+    
+            console.log(
+              "📡 ICE élève envoyé"
+            );
+    
+          }
+    
+        };
+    
+    
+        /*
+        =========================
+        📥 OFFER PROF
+        =========================
+        */
+    
+        await pc.setRemoteDescription(
+          new RTCSessionDescription(offer)
+        );
+    
+    
+        /*
+        =========================
+        📤 ANSWER ÉLÈVE
+        =========================
+        */
+    
+        const answer =
+          await pc.createAnswer();
+    
+        await pc.setLocalDescription(answer);
+    
+        console.log(
+          "📤 ANSWER envoyée"
+        );
+    
+        socket.emit(
+          "webrtc-answer",
+          {
+            answer: pc.localDescription,
+            to: from
+          }
+        );
+    
+      }
+    );
 
 
+
+   /* socket.on("webrtc-offer",async({offer, from})=>{
+        console.log("📥 OFFER reçue du prof :",from);
 
         /*
         Création PeerConnection
         */
 
-        const pc = new RTCPeerConnection({
+       /* const pc = new RTCPeerConnection({
 
           iceServers:[
             {
@@ -140,6 +267,17 @@ const LiveEleve = () => {
           ]
 
         });
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true
+        });
+        
+        stream.getTracks().forEach((track) => {
+          pc.addTrack(track, stream);
+        });
+        
+        console.log("🎤🎥 Flux élève ajouté au WebRTC");
 
 
 
@@ -154,7 +292,7 @@ const LiveEleve = () => {
         */
 
 
-        pc.ontrack = (event)=>{
+       /* pc.ontrack = (event)=>{
 
 
           console.log(
@@ -191,7 +329,7 @@ const LiveEleve = () => {
         */
 
 
-        pc.onicecandidate =
+        /*pc.onicecandidate =
         (event)=>{
 
 
@@ -228,7 +366,7 @@ const LiveEleve = () => {
         */
 
 
-        await pc.setRemoteDescription(
+        /*await pc.setRemoteDescription(
           new RTCSessionDescription(offer)
         );
 
@@ -241,7 +379,7 @@ const LiveEleve = () => {
         */
 
 
-        const answer =
+       /* const answer =
           await pc.createAnswer();
 
 
@@ -272,7 +410,7 @@ const LiveEleve = () => {
 
 
       }
-    );
+    );*/
 
 
 
