@@ -5,15 +5,11 @@ import { useParams, useNavigate } from "react-router-dom";
 const LiveEleve = () => {
 
   const { classeId } = useParams();
-
   const [users, setUsers] = useState([]);
-
   const remoteVideoRef = useRef(null);
   const localVideoRef = useRef(null);
-
   const peers = useRef({});
   const localStream = useRef(null);
-
   const navigate = useNavigate();
 
   /*
@@ -37,15 +33,9 @@ const LiveEleve = () => {
           });
 
         console.log("✅ Micro + caméra élève activés");
-        console.log(
-          "🎤 Audio tracks :",
-          stream.getAudioTracks()
-        );
+        console.log("🎤 Audio tracks :", stream.getAudioTracks());
 
-        console.log(
-          "🎥 Video tracks :",
-          stream.getVideoTracks()
-        );
+        console.log("🎥 Video tracks :",stream.getVideoTracks());
 
         localStream.current = stream;
 
@@ -62,16 +52,9 @@ const LiveEleve = () => {
         }
 
       } catch (error) {
-
-        console.error(
-          "❌ Impossible d'activer micro/caméra :",
-          error
-        );
-
+        console.error("❌ Impossible d'activer micro/caméra :",error);
       }
-
     };
-
     activerMicroCamera();
 
 
@@ -91,11 +74,7 @@ const LiveEleve = () => {
 
             track.stop();
 
-            console.log(
-              "🛑 Track élève arrêtée :",
-              track.kind
-            );
-
+            console.log("🛑 Track élève arrêtée :",track.kind);
           });
 
         localStream.current = null;
@@ -575,6 +554,7 @@ const LiveEleve = () => {
             ref={localVideoRef}
             autoPlay
             playsInline
+            controls
             muted
             width="250"
           />
