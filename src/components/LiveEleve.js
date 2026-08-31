@@ -10,6 +10,7 @@ const LiveEleve = () => {
   const localVideoRef = useRef(null);
   const peers = useRef({});
   const localStream = useRef(null);
+  const localStreamPromise = useRef(null);
   const navigate = useNavigate();
 
   /*
@@ -17,8 +18,77 @@ const LiveEleve = () => {
   🎤🎥 ACTIVER MICRO + CAMÉRA DE L'ÉLÈVE
   ==================================================
   */
-
   useEffect(() => {
+
+    localStreamPromise.current =
+      navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true
+      })
+      .then((stream) => {
+  
+        console.log("✅ Micro + caméra élève activés");
+  
+        console.log(
+          "🎤 Audio tracks :",
+          stream.getAudioTracks()
+        );
+  
+        console.log(
+          "🎥 Video tracks :",
+          stream.getVideoTracks()
+        );
+  
+        localStream.current = stream;
+  
+        if (localVideoRef.current) {
+  
+          localVideoRef.current.srcObject =
+            stream;
+  
+        }
+  
+        return stream;
+  
+      })
+      .catch((error) => {
+  
+        console.error(
+          "❌ Impossible d'activer micro/caméra :",
+          error
+        );
+  
+        throw error;
+  
+      });
+  
+  
+    return () => {
+  
+      if (localStream.current) {
+  
+        localStream.current
+          .getTracks()
+          .forEach((track) => {
+  
+            track.stop();
+  
+            console.log(
+              "🛑 Track élève arrêtée :",
+              track.kind
+            );
+  
+          });
+  
+        localStream.current = null;
+  
+      }
+  
+    };
+  
+  }, []);
+
+  /*useEffect(() => {
 
     const activerMicroCamera = async () => {
 
@@ -37,7 +107,7 @@ const LiveEleve = () => {
 
         console.log("🎥 Video tracks :",stream.getVideoTracks());
 
-        localStream.current = stream;
+        localStream.current = stream;*/
 
         /*
         ==============================
@@ -45,7 +115,7 @@ const LiveEleve = () => {
         ==============================
         */
 
-        if (localVideoRef.current) {
+        /*if (localVideoRef.current) {
 
           localVideoRef.current.srcObject = stream;
 
@@ -64,7 +134,7 @@ const LiveEleve = () => {
     ==============================
     */
 
-    return () => {
+    /*return () => {
 
       if (localStream.current) {
 
@@ -83,7 +153,7 @@ const LiveEleve = () => {
 
     };
 
-  }, []);
+  }, []);*/
 
 
   /*
@@ -185,13 +255,203 @@ const LiveEleve = () => {
     📥 OFFER DU PROFESSEUR
     ==================================================
     */
-
     const handleOffer = async ({ offer, from }) => {
 
       console.log(
         "📥 OFFER reçue du prof :",
         from
       );
+    
+      /*
+      ============================================
+      🎤 ATTENDRE MICRO + CAMÉRA
+      ============================================
+      */
+    
+      try {
+    
+        const stream =
+          await localStreamPromise.current;
+    
+        console.log(
+          "✅ Flux élève prêt avant création de l'ANSWER"
+        );
+    
+        /*
+        ============================================
+        🔗 CREER PEER CONNECTION
+        ============================================
+        */
+    
+        const pc =
+          new RTCPeerConnection({
+    
+            iceServers: [
+              {
+                urls:
+                  "stun:stun.l.google.com:19302"
+              }
+            ]
+    
+          });
+    
+        peers.current[from] = pc;
+    
+    
+        /*
+        ============================================
+        🎤🎥 AJOUTER MICRO + CAMÉRA
+        ============================================
+        */
+    
+        stream.getTracks().forEach((track) => {
+    
+          pc.addTrack(
+            track,
+            stream
+          );
+    
+          console.log(
+            "📡 Track élève ajoutée :",
+            track.kind,
+            "enabled =",
+            track.enabled
+          );
+    
+        });
+    
+    
+        /*
+        ============================================
+        🎥 RECEVOIR LE PROF
+        ============================================
+        */
+    
+        pc.ontrack = (event) => {
+    
+          console.log(
+            "🎥 Flux du prof reçu"
+          );
+    
+          const remoteStream =
+            event.streams[0];
+    
+          if (
+            remoteVideoRef.current &&
+            remoteStream
+          ) {
+    
+            remoteVideoRef.current.srcObject =
+              remoteStream;
+    
+            console.log(
+              "✅ Flux du prof attaché"
+            );
+    
+          }
+    
+        };
+    
+    
+        /*
+        ============================================
+        📡 ICE ÉLÈVE
+        ============================================
+        */
+    
+        pc.onicecandidate = (event) => {
+    
+          if (event.candidate) {
+    
+            socket.emit(
+              "webrtc-ice-candidate",
+              {
+                candidate:
+                  event.candidate,
+    
+                to: from
+              }
+            );
+    
+            console.log(
+              "📡 ICE élève envoyé"
+            );
+    
+          }
+    
+        };
+    
+    
+        /*
+        ============================================
+        📥 OFFER PROF
+        ============================================
+        */
+    
+        await pc.setRemoteDescription(
+          new RTCSessionDescription(offer)
+        );
+    
+        console.log(
+          "✅ Offer du prof installée"
+        );
+    
+    
+        /*
+        ============================================
+        📤 ANSWER
+        ============================================
+        */
+    
+        const answer =
+          await pc.createAnswer();
+    
+        await pc.setLocalDescription(
+          answer
+        );
+    
+        console.log(
+          "📤 ANSWER créée"
+        );
+    
+    
+        /*
+        ============================================
+        📤 ENVOYER ANSWER AU PROF
+        ============================================
+        */
+    
+        socket.emit(
+          "webrtc-answer",
+          {
+            answer:
+              pc.localDescription,
+    
+            to: from
+          }
+        );
+    
+        console.log(
+          "📤 ANSWER envoyée au prof"
+        );
+    
+      } catch (error) {
+    
+        console.error(
+          "❌ Erreur WebRTC élève :",
+          error
+        );
+    
+      }
+    
+    };
+
+    /*const handleOffer = async ({ offer, from }) => {
+
+      console.log(
+        "📥 OFFER reçue du prof :",
+        from
+      );*/
 
 
       /*
