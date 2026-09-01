@@ -68,7 +68,7 @@ const ListeExercicesEleve = ({ classeId }) => {
     return <p>{error}</p>;
   }
 
-  if (coursListe.length === 0) {
+  if (exercicesListe.length === 0) {
     return <p>Aucun cours pour cette classe.</p>;
   }
 
