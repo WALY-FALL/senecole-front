@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import ListeExercices from "./ListeExsercices";
+import ListeExercices from "./ListeExercices";
 
 const API_URL =
   process.env.REACT_APP_API_URL || "http://localhost:8989/api";
