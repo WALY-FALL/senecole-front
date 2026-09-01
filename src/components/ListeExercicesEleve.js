@@ -1,3 +1,88 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import ListeExercices from "./ListeExercices";
+
+const API_URL =
+  process.env.REACT_APP_API_URL || "http://localhost:8989/api";
+
+const ListeExercicesEleve = ({ classeId }) => {
+  const [exercicesListe, setExercicesListe] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const profId = localStorage.getItem("profId");
+
+  useEffect(() => {
+    const fetchExercices = async () => {
+      if (!profId) {
+        setError("Aucun professeur sélectionné.");
+        setLoading(false);
+        return;
+      }
+
+      if (!classeId) {
+        setError("⏳ Aucune classe sélectionnée.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem("token");
+
+        console.log("👨‍🏫 Prof ID :", profId);
+        console.log("🏫 Classe ID :", classeId);
+        console.log("📝 Recherche des exercices...");
+
+        const res = await axios.get(
+          `${API_URL}/exercices/classe/${classeId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log("📝 Exercices reçus :", res.data);
+
+        setExercicesListe(res.data);
+      } catch (err) {
+        console.error(
+          "❌ Erreur récupération exercices élève :",
+          err.response?.data || err.message
+        );
+
+        setError("Impossible de récupérer les exercices.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExercices();
+  }, [profId, classeId]);
+
+  if (loading) {
+    return <p>Chargement des exercices...</p>;
+  }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
+
+  if (exercicesListe.length === 0) {
+    return <p>Aucun exercice pour cette classe.</p>;
+  }
+
+  return (
+    <div>
+      <ListeExercices
+        exercicesClasse={exercicesListe}
+        API_URL={API_URL}
+      />
+    </div>
+  );
+};
+
+export default ListeExercicesEleve;
 /*import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ListeExercices from "./ListeExercices";
