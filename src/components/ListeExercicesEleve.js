@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import ListeExercices from "./ListeExercices";
+import ListeExercices from "./ListeExsercices";
 
 const API_URL =
   process.env.REACT_APP_API_URL || "http://localhost:8989/api";
@@ -31,7 +31,7 @@ const ListeExercicesEleve = ({ classeId }) => {
 
         console.log("👨‍🏫 Prof ID :", profId);
         console.log("🏫 Classe ID :", classeId);
-        console.log("📝 Recherche des exercices...");
+        console.log("📚 Recherche des cours...");
 
         const res = await axios.get(
           `${API_URL}/exercices/classe/${classeId}`,
@@ -42,16 +42,16 @@ const ListeExercicesEleve = ({ classeId }) => {
           }
         );
 
-        console.log("📝 Exercices reçus :", res.data);
+        console.log("📚 Exercices reçus :", res.data);
 
         setExercicesListe(res.data);
       } catch (err) {
         console.error(
-          "❌ Erreur récupération exercices élève :",
+          "❌ Erreur récupération cours élève :",
           err.response?.data || err.message
         );
 
-        setError("Impossible de récupérer les exercices.");
+        setError("Impossible de récupérer les cours.");
       } finally {
         setLoading(false);
       }
@@ -61,21 +61,22 @@ const ListeExercicesEleve = ({ classeId }) => {
   }, [profId, classeId]);
 
   if (loading) {
-    return <p>Chargement des exercices...</p>;
+    return <p>Chargement des cours...</p>;
   }
 
   if (error) {
     return <p>{error}</p>;
   }
 
-  if (exercicesListe.length === 0) {
-    return <p>Aucun exercice pour cette classe.</p>;
+  if (coursListe.length === 0) {
+    return <p>Aucun cours pour cette classe.</p>;
   }
 
   return (
     <div>
       <ListeExercices
         exercicesClasse={exercicesListe}
+        handleDeleteExercices={() => {}}
         API_URL={API_URL}
       />
     </div>
