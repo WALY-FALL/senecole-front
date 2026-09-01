@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+/*import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ListeExercices from "./ListeExercices";
 
@@ -92,7 +92,7 @@ const ListeExercicesEleve = () => {
         </div>
       ))}
     </div>
-  );*/
+  );
 };
 
-export default ListeExercicesEleve;
+export default ListeExercicesEleve;*/
