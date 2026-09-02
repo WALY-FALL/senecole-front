@@ -29,8 +29,8 @@ const ListeCours = ({ coursClasse, handleDeleteCours }) => {
                 flex: "1 1 180px",
                 maxWidth: "180px",
                 display: "flex",
-               // flexDirection: "column",
-                flexDirection:"row",
+                flexDirection: "column",
+               // flexDirection:"row",
                 justifyContent: "space-between",
               }}
             >
