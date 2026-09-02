@@ -97,6 +97,8 @@ const Espaceprofs = () => {
       alert("Erreur lors de la suppression de la classe");
     }
   };
+  console.log("🔑 TOKEN PROF :", localStorage.getItem("token"));
+console.log("👨‍🏫 PROF ID :", localStorage.getItem("profId"));
 
   const handleBackToList = () => {
     setSelectedClasse(null);
