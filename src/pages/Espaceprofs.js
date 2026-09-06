@@ -9,7 +9,7 @@ import PosterDevoirs from "../components/PosterDevoirs";
 import DemandesAccesProf from "../components/DemandesAccesProf";
 import ListeExercices from "../components/ListeExercices";
 import ListeDevoirs from "../components/ListeDevoirs";
-import ListeEleves from "./ListeEleves";
+import ListeEleves from "../cmoponents/ListeEleves";
 //import socket from "../socket";
 
 
