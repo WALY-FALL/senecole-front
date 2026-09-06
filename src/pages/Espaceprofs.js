@@ -9,6 +9,7 @@ import PosterDevoirs from "../components/PosterDevoirs";
 import DemandesAccesProf from "../components/DemandesAccesProf";
 import ListeExercices from "../components/ListeExercices";
 import ListeDevoirs from "../components/ListeDevoirs";
+import ListeEleves from "./ListeEleves";
 //import socket from "../socket";
 
 
@@ -31,6 +32,8 @@ const Espaceprofs = () => {
   const [exercicesClasse, setExercicesClasse] = useState([]);
   const [devoirsClasse, setDevoirsClasse] = useState([]);
   const navigate = useNavigate();
+  const [classeId, setClasseId] = useState(null);
+  const [showListeEleves, setShowListeEleves] = useState(false);
 
   const token = localStorage.getItem("token");
 
@@ -50,19 +53,6 @@ const Espaceprofs = () => {
     }
  }, [token]);
 
-  /*const fetchClasses = async () => {
-    try {
-   
-      const res = await axios.get(`${API_URL}/classes/my-classes`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setClasses(res.data.classes || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };*/
 
   // 🔹 Charger les cours d'une classe
   const fetchCoursClasse = async (classeId) => {
@@ -375,6 +365,11 @@ const demarrerLive = async () => {
           <li>👩‍🏫 Profil</li>
           <li>⚙️ Paramètres</li>
         </ul>
+
+        {/*liste des eleves*/}
+        {showListeEleves && (
+  <ListeEleves classeId={classeId} />
+)}
       </div>
 
       {/* Zone principale */}
@@ -415,7 +410,12 @@ const demarrerLive = async () => {
           <div>
             <nav className="nav-boutons">
   <button onClick={handleBackToList}>Retour à mes classes</button>
-  <button>Liste des élèves</button>
+
+  <button onClick={() => setShowListeEleves(!showListeEleves)}>
+  {showListeEleves ? "Fermer la liste" : "Liste des élèves"}
+</button>
+
+
   <button onClick={() => setShowUploadForm(!showUploadForm)}>
     {showUploadForm ? "Fermer le formulaire" : "Poster un cours"}
   </button>
