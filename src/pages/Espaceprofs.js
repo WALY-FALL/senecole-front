@@ -69,6 +69,7 @@ const Espaceprofs = () => {
   // 🔹 Sélection d'une classe
   const handleSelectClasse = async (classe) => {
     setSelectedClasse(classe);
+    setClasseId(classe._id);
     fetchCoursClasse(classe._id);
     fetchExercicesClasse(classe._id);
     fetchDevoirsClasse(classe._id);
